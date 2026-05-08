@@ -7,6 +7,13 @@ SOURCE_FILE="www-data.sudoers"
 SCRIPT_FILE=$(basename "$0")
 CONFIG_FILE="include/config.inc.php"
 AUTH_FILE="/etc/svxlink/dashboard.auth.ini"
+CURRENT_USER=${SUDO_USER:-$(whoami)}
+USER_HOME=$(getent passwd "$CURRENT_USER" | cut -d: -f6)
+if [ -z "$USER_HOME" ]; then
+    USER_HOME="/home/$CURRENT_USER"
+fi
+LOCAL_SCRIPT_DIR="$USER_HOME/scripts"
+
 # Function to display an info message using whiptail
 show_info() {
   whiptail --title "Information" --msgbox "$1" 8 78
@@ -99,36 +106,42 @@ show_info "Ownership of files in /var/www/html has been changed to svxlink:svxli
 # Node.js, npm, and svxlink-node.service setup
 # ==============================
 
-# Check if Node.js is installed for the pi user
-if ! sudo -u pi command -v node >/dev/null 2>&1; then
-    show_info "Node.js not found. Installing Node.js and npm as pi..."
+# Check if Node.js is installed
+if ! command -v node >/dev/null 2>&1; then
+    show_info "Node.js not found. Installing Node.js and npm..."
     sudo apt update
     sudo apt install -y nodejs npm
 else
-    show_info "Node.js is already installed: $(sudo -u pi node -v)"
+    show_info "Node.js is already installed: $(node -v)"
 fi
 
-# Check if npm is installed for the pi user
-CURRENT_USER=${SUDO_USER:-$(whoami)}
-
-if ! sudo -u "$CURRENT_USER" command -v npm >/dev/null 2>&1; then
-    show_info "npm not found. Installing npm as $CURRENT_USER"
+if ! command -v npm >/dev/null 2>&1; then
+    show_info "npm not found. Installing npm..."
     sudo apt install -y npm
 else
-    show_info "npm is already installed: $(sudo -u "$CURRENT_USER" npm -v)"
+    show_info "npm is already installed: $(npm -v)"
 fi
 
 
-# Ensure webserver user (svxlink) can run npm-installed scripts if needed
-sudo chown -R $CURRENT_USER:$CURRENT_USER /home/$CURRENT_USER/.npm*
-sudo chmod -R 755 /home/$CURRENT_USER/.npm-global
+# Ensure npm cache/home paths exist for the current and service users.
+sudo mkdir -p "$USER_HOME/.npm" "$USER_HOME/.npm-global"
+sudo chown -R "$CURRENT_USER:$CURRENT_USER" "$USER_HOME/.npm" "$USER_HOME/.npm-global"
+sudo chmod -R 755 "$USER_HOME/.npm-global"
+
+SVXLINK_HOME=$(getent passwd svxlink | cut -d: -f6)
+if [ -z "$SVXLINK_HOME" ]; then
+    SVXLINK_HOME="/home/svxlink"
+fi
+sudo mkdir -p "$SVXLINK_HOME" "$SVXLINK_HOME/.npm"
+sudo chown -R svxlink:svxlink "$SVXLINK_HOME"
+sudo chmod 755 "$SVXLINK_HOME"
 
 
 # Ensure ws module is installed for svxlink user in scripts folder
 SCRIPT_DIR="/var/www/html/scripts"
 if [ ! -d "$SCRIPT_DIR/node_modules/ws" ]; then
     show_info "Installing ws Node module for svxlink user..."
-    sudo -u svxlink bash -c "cd $SCRIPT_DIR && npm install ws"
+    sudo -u svxlink env HOME="$SVXLINK_HOME" npm --prefix "$SCRIPT_DIR" install ws
 else
     show_info "Node module ws is already installed."
 fi
@@ -152,7 +165,7 @@ Restart=always
 RestartSec=5
 
 # Allow clean reloads (optional, useful if you add reload scripts later)
-ExecReload=/bin/kill -HUP $MAINPID
+ExecReload=/bin/kill -HUP \$MAINPID
 
 # Give the process a few seconds to shut down gracefully
 TimeoutStopSec=10
@@ -180,14 +193,14 @@ fi
 sudo systemctl is-active --quiet svxlink-node.service && show_info "svxlink-node.service is running." || show_info "svxlink-node.service is not running!"
 
 # ==============================
-# Create /home/pi/scripts/dtmf_setup.sh if missing and run it
+# Create the local helper scripts directory if missing.
 # ==============================
 
-DTMF_SCRIPT="/home/pi/scripts/dtmf_setup.sh"
+DTMF_SCRIPT="$LOCAL_SCRIPT_DIR/dtmf_setup.sh"
 
 if [ ! -f "$DTMF_SCRIPT" ]; then
     show_info "Creating $DTMF_SCRIPT..."
-    sudo mkdir -p /home/pi/scripts
+    sudo mkdir -p "$LOCAL_SCRIPT_DIR"
     echo "#!/bin/sh
 sudo mkdir -p /var/run/svxlink
 sudo chown svxlink:svxlink /var/run/svxlink
@@ -203,15 +216,15 @@ fi
 show_info "Running $DTMF_SCRIPT..."
 sudo "$DTMF_SCRIPT"
 # Add Modification to /usr/share/svxlink/events.d/local/EchoLink.tcl
+sudo mkdir -p /usr/share/svxlink/events.d/local
 sudo cp -f /var/www/html/EchoLink.tcl /usr/share/svxlink/events.d/local/EchoLink.tcl
-# New section to create /home/pi/scripts and cleanup.sh
-SCRIPT_DIR="/home/pi/scripts"
-CLEANUP_SCRIPT="$SCRIPT_DIR/cleanup.sh"
+# New section to create cleanup.sh
+CLEANUP_SCRIPT="$LOCAL_SCRIPT_DIR/cleanup.sh"
 
 # Check if the script directory exists, if not, create it
-if [ ! -d "$SCRIPT_DIR" ]; then
-    mkdir -p "$SCRIPT_DIR"
-    show_info "Created directory $SCRIPT_DIR"
+if [ ! -d "$LOCAL_SCRIPT_DIR" ]; then
+    mkdir -p "$LOCAL_SCRIPT_DIR"
+    show_info "Created directory $LOCAL_SCRIPT_DIR"
 fi
 
 # Check if the cleanup.sh script exists
@@ -239,7 +252,7 @@ fi" > "$CLEANUP_SCRIPT"
 fi
 
 # Check and add the cleanup.sh script to the sudo crontab if not already present
-CRON_JOB="01 00 * * * /home/pi/scripts/cleanup.sh"
+CRON_JOB="01 00 * * * $CLEANUP_SCRIPT"
 ( sudo crontab -l | grep -q "$CRON_JOB" ) || ( sudo crontab -l; echo "$CRON_JOB" ) | sudo crontab -
 
 # Inform the user that the crontab entry has been added if it was not present
