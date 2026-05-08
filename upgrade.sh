@@ -72,6 +72,8 @@ cat "$SOURCE_FILE" > "$SUDOERS_FILE"
 # Inform the user that the operation was successful
 show_info "Content from $SOURCE_FILE has been written to $SUDOERS_FILE successfully."
 
+sudo chmod +x /var/www/html/scripts/install_tg_schedule_cron.sh 2>/dev/null || true
+
 # Validate the syntax of the sudoers file
 visudo -cf "$SUDOERS_FILE"
 if [ $? -eq 0 ]; then

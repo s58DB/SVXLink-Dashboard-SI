@@ -1,11 +1,11 @@
 <?php
 header("Content-type: text/css");
-    $backgroundPage = "edf0f5";         
-    $backgroundContent = "f1f1f1";     
-    $backgroundBanners = "0000ff";     
+    $backgroundPage = "f7f9fc";         
+    $backgroundContent = "ffffff";     
+    $backgroundBanners = "0b2f63";     
     $textBanners = "ffffff";           
     $bannerDropShaddows = "303030";    
-    $tableHeadDropShaddow = "8b0000";  
+    $tableHeadDropShaddow = "1f3d6d";  
     $textContent = "000000";           
     $tableRowEvenBg = "f7f7f7";		
     $tableRowOddBg = "e0e0e0";	
@@ -13,8 +13,9 @@ header("Content-type: text/css");
 .container {
     width: 900px;
     text-align: left;
-    background : #f1f1f1;
+    background : #ffffff;
     margin: auto;
+    border-radius: 8px;
 }
 .disabled {
 		pointer-events: none;
@@ -35,16 +36,70 @@ body, font {
     color : #<?php echo $textBanners; ?>;
     font-family : verdana, arial, sans-serif;
     text-align : left;
-    padding : 5px 0px 5px 0px;
-    border-radius : 10px 10px 10px 10px;
+    padding : 8px 0px 8px 0px;
+    border-radius : 8px 8px 0 0;
+    border-bottom: 4px solid #d71920;
  }
+
+.site-header-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 26px;
+}
+
+.site-logo img {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+}
+
+.site-title {
+    flex: 1;
+    text-align: center;
+}
+
+.site-title .callsign {
+    display: block;
+    font-size: 31px;
+    letter-spacing: 3px;
+    font-family: Arial, sans-serif;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.site-title .network {
+    display: block;
+    margin-top: 2px;
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: #dce8f8;
+}
+
+.site-emblem {
+    min-width: 82px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.38);
+    border-radius: 6px;
+    padding: 5px 8px;
+    color: #ffffff;
+    font-size: 10px;
+    line-height: 1.2;
+    background: rgba(255,255,255,0.08);
+}
+
+.site-emblem strong {
+    display: block;
+    font-size: 18px;
+    letter-spacing: 1px;
+}
 
 .nav {
     float : left;
     margin : 0;
     padding : 3px 3px 3px 3px;
     width : 185px;
-    background : #f1f1f1;
+    background : #ffffff;
     font-weight : normal;
     min-height : 100%;
 }
@@ -78,7 +133,7 @@ body, font {
     font-size : 9px;
     text-align : center;
     padding : 10px 0 10px 0;
-    border-radius : 0 0 10px 10px;
+    border-radius : 0 0 8px 8px;
     clear : both;
 }
 
@@ -120,7 +175,7 @@ border: none;
 font-size:12px; 
 color:white; 
 font-weight: bold;
-background-color: #045fb4;
+background-color: #0b2f63;
 }
 
 table.linki a:link {
@@ -184,6 +239,54 @@ table td.links {
 body {
     background: #<?php echo $backgroundPage; ?>;
     color: #000000;
+}
+
+#display-links,
+#full-edit-links {
+    background: #ffffff;
+    border-bottom: 1px solid #d7e0ea;
+}
+
+#display-links p,
+#full-edit-links p {
+    margin: 0;
+    padding: 7px 12px;
+    text-align: right;
+    color: #23364d;
+}
+
+#display-links a,
+#full-edit-links a {
+    display: inline-block;
+    padding: 3px 7px;
+    border-radius: 4px;
+    color: #0b2f63 !important;
+    font-weight: 600;
+}
+
+#display-links a:hover,
+#full-edit-links a:hover {
+    background: #eef4fb;
+    color: #d71920 !important;
+}
+
+#display-links a.nav-alert,
+#full-edit-links a.nav-alert {
+    color: #b51d28 !important;
+}
+
+.nav-locked {
+    color: #8a97a7;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.dashboard-footer-note {
+    display: block;
+    padding: 8px 0 2px;
+    color: #0b2f63;
+    font: 8pt Arial, sans-serif;
+    text-align: center;
 }
 
 a {
@@ -356,7 +459,7 @@ input.toggle-round-flat:checked + label:after {
     background-color: #<?php echo $backgroundBanners; ?>;
 }
 .button {
-  background-color: #356244;
+  background-color: #176b45;
   border: none;
   color: white;
   padding: 8px;
@@ -366,13 +469,117 @@ input.toggle-round-flat:checked + label:after {
   font-size: 14px;
   font-weight: 500;
   margin: 4px 2px;
-  border-radius: 8px;
-  box-shadow: 0px 8px 10px rgba(0,0,0,0.1);
+  border-radius: 6px;
+  box-shadow: 0px 2px 6px rgba(11,47,99,0.16);
 }
-.link {background-color: #2A6594; outline:none;}
+.link {background-color: #0b2f63; outline:none;}
 .link:hover {background-color: #3a87cd; outline:none;}
-.blink {background-color: #b00; outline:none; color:white}
-.blink:hover {background-color: #ff5722; outline:none;color:white}
+.blink {background-color: #b51d28; outline:none; color:white}
+.blink:hover {background-color: #d71920; outline:none;color:white}
+
+.control-panel {
+  box-shadow: 0 8px 24px rgba(11,47,99,0.12);
+  background-color: #ffffff;
+  border: 1px solid #d7e0ea;
+  width: 855px;
+  margin: 5px 0 14px 6px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+.control-panel-inner {
+  padding: 10px;
+  width: auto;
+  background: #f8fafc;
+  border-radius: 7px;
+  border: 1px solid #e1e7ef;
+  white-space: normal;
+}
+
+.control-panel-title {
+  color: #0b2f63;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  text-align: left;
+}
+
+.button-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.schedule-panel {
+  margin: 10px auto 0;
+  padding-top: 10px;
+  border-top: 1px solid #d7e0ea;
+  color: #23364d;
+  text-align: left;
+}
+
+.schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(5, auto);
+  align-items: end;
+  justify-content: center;
+  gap: 8px;
+}
+
+.schedule-grid label {
+  display: block;
+  color: #23364d;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.schedule-grid input,
+.schedule-grid select {
+  border: 1px solid #b9c8d8;
+  border-radius: 4px;
+  color: #0b2f63;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 7px;
+  background: #ffffff;
+}
+
+.schedule-status {
+  margin: 8px auto 0;
+  max-width: 760px;
+  color: #31516f;
+  font-size: 11px;
+  text-align: center;
+}
+
+.schedule-cron {
+  display: block;
+  margin-top: 5px;
+  padding: 6px;
+  overflow-x: auto;
+  color: #ffffff;
+  background: #10233d;
+  border-radius: 4px;
+  font-family: "Lucidia Console", Monaco, monospace;
+}
+
+.auth-warning {
+  margin: 10px auto;
+  padding: 9px 12px;
+  max-width: 760px;
+  color: #8f1420;
+  background: #fff2f4;
+  border: 1px solid #e6b5bd;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.schedule-panel.locked {
+  opacity: 0.72;
+}
 
 
 .dropbtn {
@@ -509,7 +716,7 @@ input[type=text] {
 }
 .green
 {
-  background-color: #448f47;
+  background-color: #176b45;
   border: none;
   color: white;
   font-weight: 600;
@@ -518,7 +725,7 @@ input[type=text] {
   text-decoration: none;
   margin: 4px 4px;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 5px;
 }
 
 .monitor_id
@@ -603,7 +810,7 @@ input[type=text] {
 
 .blue
 {
-  background-color: blue;
+  background-color: #0b2f63;
   border: none;
   color: white;
   font-weight: 600;
@@ -612,11 +819,11 @@ input[type=text] {
   text-decoration: none;
   margin: 4px 4px;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 5px;
 }
 .red
 {
-  background-color: red;
+  background-color: #b51d28;
   border: none;
   color: white;
   font-weight: 600;
@@ -625,11 +832,11 @@ input[type=text] {
   text-decoration: none;
   margin: 4px 4px;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 5px;
 }
 .orange
 {
-  background-color: DarkOrange;
+  background-color: #3f6f9f;
   border: none;
   color: white;
   font-weight: 600;
@@ -642,7 +849,7 @@ input[type=text] {
 }
 .purple
 {
-  background-color: purple;
+  background-color: #5d4f8f;
   border: none;
   color: white;
   font-weight: 600;
@@ -655,7 +862,7 @@ input[type=text] {
 }
 .gold
 {
-  background-color: gold;
+  background-color: #f4c542;
   border: none;
   color: black;
   font-weight: 600;
@@ -694,7 +901,7 @@ input[type=text] {
 }
 .yellow
 {
-  background-color: yellow;
+  background-color: #e8c547;
   border: none;
   color: black;
   font-weight: 600;
@@ -707,7 +914,7 @@ input[type=text] {
 }
 .green
 {
-  background-color: green;
+  background-color: #176b45;
   border: none;
   color: white;
   font-weight: 600;
@@ -745,4 +952,3 @@ div.img img{
 .hideScrollbar::-webkit-scrollbar{
   display: none; 
  }
-

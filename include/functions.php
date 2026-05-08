@@ -4,6 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 include_once "config.php";         
 include_once "tools.php";        
+include_once __DIR__ . "/auth.php";
 //include_once __DIR__.'/functions.php';
 //require_once __DIR__.'/include/config.php';
 //function open_for_edit($filename) {
@@ -12,6 +13,7 @@ include_once "tools.php";
 //        }
 //        $parts = explode(",", $file_conf['A']['B']);
 //}
+
 
 function getSVXLog() {
 	// Open Logfile and copy loglines into LogLines-Array()
@@ -799,4 +801,3 @@ function display_config($config) {
 
    
     
-

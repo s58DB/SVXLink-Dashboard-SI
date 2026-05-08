@@ -5,8 +5,14 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Include the functions file
 include '../include/functions.php';
+include_once '../include/auth.php';
 
 if (isset($_GET['action']) && $_GET['action'] === 'fetch_log') {
+    if (!isAuthorised()) {
+        http_response_code(403);
+        echo "Niste avtorizirani za ogled loga.";
+        exit();
+    }
     $log = getLogContent();
 
     // Remove all <br> or <br /> tags
@@ -147,6 +153,13 @@ window.onload = fetchLog;
                                              text-shadow:0.25px 0.25px gray;">
             Live Log Viewer
         </h1>
+<?php
+if (!isAuthorised()) {
+    renderUnauthorisedMessage("Niste avtorizirani za ogled loga. Najprej se prijavite kot sysop.");
+    echo '</div></fieldset></center></body></html>';
+    exit;
+}
+?>
         <pre id="log" style="text-align:left;">Loading log...</pre>
     </div>
 </fieldset>

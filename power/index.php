@@ -2,6 +2,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+include_once "../include/auth.php";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -131,7 +132,9 @@ if (isset($_POST['btnRestart']))
         exec($command,$screen,$retval);
 }
 } else {
-  echo '<h1 id="power" style = "color:#00aee8;font: 18pt arial, sans-serif;font-weight:bold; text-shadow: 0.25px 0.25px gray;">You are not authorised to make changes here.</h1>';
+  renderUnauthorisedMessage("Niste avtorizirani za napajanje ali restart. Najprej se prijavite kot sysop.");
+  echo '</center></div></fieldset></body></html>';
+  exit;
  
 }
 ?>

@@ -24,6 +24,7 @@ include "include/config.php";
     <meta http-equiv="expires" content="0" />
     <meta http-equiv="pragma" content="no-cache" />
 <link rel="shortcut icon" href="images/favicon.ico" sizes="16x16 32x32" type="image/png">    
+    <link href="css/css.php" type="text/css" rel="stylesheet" />
 
 <?php echo ("<title>" . $callsign ." Ver 2.3 Dashboard</title>" ); ?>
 
@@ -39,20 +40,19 @@ include "include/config.php";
 <link rel="stylesheet" href="">
 
 </head>
-<body style = "background-color: #e1e1e1;font: 11pt arial, sans-serif;">
+<body style = "font: 11pt arial, sans-serif;">
 <center>
-<fieldset style = "box-shadow:5px 5px 20px #999; background-color:#f1f1f1; width:900px;margin-top:15px;margin-left:0px;margin-right:5px;font-size:13px;border-top-left-radius: 10px; border-top-right-radius: 10px;border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+<fieldset style = "box-shadow:0 10px 28px rgba(11,47,99,0.16); background-color:#ffffff; width:900px;margin-top:15px;margin-left:0px;margin-right:5px;font-size:13px;border:1px solid #d7e0ea;border-radius:8px;">
 <div class="container"> 
 <div class="header">
-<div class="parent">
-    <div class="img" style = "padding-left:30px"><img src="images/svxlink.ico" /></div>
-    <div class="text"style = "padding-right:230px">
-<center><p style = "margin-top:5px;margin-bottom:0px;">
-<span style = "font-size: 32px;letter-spacing:4px;font-family: &quot;sans-serif&quot;, sans-serif;font-weight:500;color:#fff8dc"><?php echo $callsign;?></span>
-<p style = "margin-top:0px;margin-bottom:0px;">
-<span style = "font-size: 18px;letter-spacing:4px;font-family: &quot;sans-serif&quot;, sans-serif;font-weight:500;color:#fff8dc"><?php echo $fmnetwork; ?></span>
-</p></center>
-</div></div>
+<div class="site-header-inner">
+    <div class="site-logo"><img src="images/svxlink.ico" alt="SVXLink" /></div>
+    <div class="site-title">
+        <span class="callsign"><?php echo $callsign;?></span>
+        <span class="network"><?php echo $fmnetwork; ?></span>
+    </div>
+    <div class="site-emblem"><strong>ZRS</strong>Zveza radioamaterjev Slovenije</div>
+</div>
 </div>
 <?php include_once "include/top_menu.php"; ?>
 
@@ -146,7 +146,7 @@ include_once "include/buttons.php"; }
     echo '</div>'."\n";
 ?>
 
-<center><span title="Dashboard" style = "font: 7pt arial, sans-serif;">SvxLink Dashboard Ver 2.3 ©  G4NAB, SP2ONG, SP0DZ <?php $cdate=date("Y"); if ($cdate > "2021") {$cdate="2021-".date("Y");} echo $cdate ;
+<center><span class="dashboard-footer-note" title="Dashboard">SVXLink Dashboard Slovenija | Ver 2.3 | G4NAB, SP2ONG, SP0DZ <?php $cdate=date("Y"); if ($cdate > "2021") {$cdate="2021-".date("Y");} echo $cdate ;
  ?>
 </div>
 </fieldset>

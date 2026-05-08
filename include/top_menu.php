@@ -2,29 +2,38 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+include_once __DIR__ . "/auth.php";
 ?>
    <div id="display-links">
-	<p style = "padding-right: 5px; text-align: right; color: #000000;">
-	<a style = "color: black;">Display</a> |
-	<a href="/index.php" style = "color: #0000ff;">Dashboard</a> | 
-	<a href="/node.php" style = "color: #0000ff;">Nodes</a> | 
-	<a href="/tg.php" style = "color: #0000ff;">Talk Groups</a> | 
-	<a href="/dtmf.php" style = "color: #0000ff;">Dtmf</a> | 
-	<a href="/audio.php" style = "color: #0000ff;">Audio</a> | 
-	<a href="editor.php?id=log" style = "color: crimson;" id="log">Log</a> |
-	<a href="/authorise.php" style = "color: crimson;">Authorise</a></p>
+	<p>
+	<a>Pregled</a> |
+	<a href="/index.php">Nadzorna plosca</a> |
+	<a href="/node.php">Vozlisca</a> |
+	<a href="/tg.php">Talk Groups</a> |
+	<a href="/dtmf.php">DTMF</a> |
+	<a href="/audio.php">Audio</a> |
+<?php if (isAuthorised()) { ?>
+	<a href="editor.php?id=log" class="nav-alert" id="log">Log</a> |
+<?php } ?>
+	<a href="/authorise.php" class="nav-alert"><?php echo isAuthorised() ? "Avtoriziran" : "Prijava"; ?></a></p>
 	</div>
+<?php if (isAuthorised()) { ?>
 	<div id="full-edit-links">
-	<p style = "padding-right: 5px; text-align: right; color: #000000;" <a style = "color: black;">Full Edit</a> |
-	<a href="/editor.php?id=svxlink" style = "color: crimson;" id="svxlink">SVXLink</a> |
-	<a href="/editor.php?id=talkgroups" style = "color: crimson;" id="talkgroups">Talkgroups</a> |
-	<a href="/editor.php?id=buttons" style = "color: crimson;" id="buttons">Buttons</a> |
-	<a href="/editor.php?id=amixer" style = "color: crimson;" id="amixer">Amixer</a> |
-	<a href="/editor.php?id=echolink" style = "color: crimson;" id="echolink">EchoLink</a> |
-	<a href="/editor.php?id=metarinfo" style = "color: crimson;" id="metarinfo">MetarInfo</a> |
-	<a href="/editor.php?id=nodeInfo" style = "color: crimson;" id="nodeInfo">NodeInfo</a> |
-	<a href="/editor.php?id=power" style = "color: green;">Power</a></p>
+	<p><a>Urejanje</a> |
+	<a href="/editor.php?id=svxlink" class="nav-alert" id="svxlink">SVXLink</a> |
+	<a href="/editor.php?id=talkgroups" class="nav-alert" id="talkgroups">Talkgroups</a> |
+	<a href="/editor.php?id=buttons" class="nav-alert" id="buttons">Gumbi</a> |
+	<a href="/editor.php?id=amixer" class="nav-alert" id="amixer">Amixer</a> |
+	<a href="/editor.php?id=echolink" class="nav-alert" id="echolink">EchoLink</a> |
+	<a href="/editor.php?id=metarinfo" class="nav-alert" id="metarinfo">MetarInfo</a> |
+	<a href="/editor.php?id=nodeInfo" class="nav-alert" id="nodeInfo">NodeInfo</a> |
+	<a href="/editor.php?id=power">Napajanje</a></p>
     </div>
+<?php } else { ?>
+	<div id="full-edit-links">
+	<p><a>Urejanje</a> | <span class="nav-locked">Za urejanje, log in napajanje se morate prijaviti.</span></p>
+    </div>
+<?php } ?>
 
 	 
 
@@ -60,4 +69,3 @@ include_once('parse_svxconf.php');
 }
 }*/
 ?>
-

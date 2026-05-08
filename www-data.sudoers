@@ -11,3 +11,5 @@ svxlink ALL=(ALL) NOPASSWD: /usr/sbin/ip
 svxlink ALL=(ALL) NOPASSWD: /usr/bin/systemctl
 svxlink ALL=(ALL) NOPASSWD: /usr/bin/amixer
 svxlink ALL=(ALL) NOPASSWD: /bin/echo * > /var/run/svxlink/dtmf_svx
+svxlink ALL=(root) NOPASSWD: /var/www/html/scripts/install_tg_schedule_cron.sh *
+www-data ALL=(root) NOPASSWD: /var/www/html/scripts/install_tg_schedule_cron.sh *

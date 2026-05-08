@@ -1,5 +1,6 @@
 <?php
 include "../include/tools.php";
+include_once "../include/auth.php";
 ?>
 
 <!DOCTYPE html>
@@ -164,6 +165,12 @@ include "../include/tools.php";
                     <h1 id="dtmf_info" style = "color:#00aee8;font: 18pt arial, sans-serif;font-weight:bold; text-shadow: 0.25px 0.25px gray;">DTMF Dialer</h1>
 
                     <?php
+if (!isAuthorised()) {
+    renderUnauthorisedMessage("Niste avtorizirani za DTMF ukaze. Najprej se prijavite kot sysop.");
+    echo '</center></div></fieldset></body></html>';
+    exit;
+}
+
 //function cidr_match($ip, $cidr) {
 //    $outcome = false;
 //    $pattern = '/^(([01]?\d?\d|2[0-4]\d|25[0-5])\.){3}([01]?\d?\d|2[0-4]\d|25[0-5])\/(\d{1}|[0-2]{1}\d{1}|3[0-2])$/';
