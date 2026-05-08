@@ -40,16 +40,19 @@ function getSVXLog() {
 }
 function getLogContent() {
     // Possible log file names
-    $logFiles = ['/var/log/svxlink.log', '/var/log/svxlink'];
+    $logFiles = ['/var/log/svxlink.log', '/var/log/svxlink', '/var/log/svxlink.log.1'];
 
     // Initialize log content variable
     $logContent = '';
 
     // Iterate over possible log files and read the first one that exists
     foreach ($logFiles as $logFile) {
-        if (file_exists($logFile)) {
+        if (is_readable($logFile)) {
             // Read the entire log file into an array of lines
-            $lines = file($logFile);
+            $lines = file($logFile, FILE_IGNORE_NEW_LINES);
+            if ($lines === false) {
+                continue;
+            }
 
             // Calculate the number of lines in the log file
             $numLines = count($lines);
@@ -61,13 +64,25 @@ function getLogContent() {
             $last10Lines = array_slice($lines, $startLine);
 
             // Join the lines into a single string without adding extra line breaks
-            $logContent = implode('', $last10Lines);
+            $logContent = implode("\n", $last10Lines);
             break;
         }
     }
 
+    if ($logContent === '') {
+        $reader = realpath(__DIR__ . '/../scripts/read_svxlink_log.sh');
+        if ($reader !== false) {
+            $output = array();
+            $returnCode = 0;
+            exec('sudo ' . escapeshellarg($reader) . ' 2>&1', $output, $returnCode);
+            if ($returnCode === 0 && count($output) > 0) {
+                $logContent = implode("\n", $output);
+            }
+        }
+    }
+
     // Return log content or an error message
-    return $logContent !== '' ? nl2br($logContent) : "Log file not found.";
+    return $logContent !== '' ? nl2br($logContent) : "Log file not found or not readable by the web user.";
 }
 
 

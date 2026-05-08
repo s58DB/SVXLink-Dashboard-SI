@@ -80,6 +80,7 @@ cat "$SOURCE_FILE" > "$SUDOERS_FILE"
 show_info "Content from $SOURCE_FILE has been written to $SUDOERS_FILE successfully."
 
 sudo chmod +x /var/www/html/scripts/install_tg_schedule_cron.sh 2>/dev/null || true
+sudo chmod +x /var/www/html/scripts/read_svxlink_log.sh 2>/dev/null || true
 
 # Validate the syntax of the sudoers file
 visudo -cf "$SUDOERS_FILE"
