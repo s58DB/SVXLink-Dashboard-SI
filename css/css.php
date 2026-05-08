@@ -283,10 +283,18 @@ body {
 
 .dashboard-footer-note {
     display: block;
-    padding: 8px 0 2px;
-    color: #0b2f63;
+    margin: 8px auto 0;
+    padding: 9px 12px 7px;
+    color: #23364d;
+    background: #f8fafc;
+    border-top: 1px solid #d7e0ea;
     font: 8pt Arial, sans-serif;
+    line-height: 1.45;
     text-align: center;
+}
+
+.dashboard-footer-note strong {
+    color: #0b2f63;
 }
 
 a {

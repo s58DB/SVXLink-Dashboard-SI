@@ -29,7 +29,7 @@ include_once "include/tools.php";
     <meta http-equiv="pragma" content="no-cache" />
 <link rel="shortcut icon" href="images/favicon.ico" sizes="16x16 32x32" type="image/png">
  
-<?php echo ("<title>" . $callsign ." Ver 2.3 Dashboard</title>"); ?>
+<?php echo ("<title>" . $callsign ." SI v0.1 Dashboard</title>"); ?>
 
  <?php include_once "include/browserdetect.php"; ?>
     <script type="text/javascript" src="scripts/jquery.min.js"></script>
@@ -127,7 +127,7 @@ include_once "include/buttons.php"; }
     echo '</div>'."\n";
 ?>
 
-<center><span title="Dashboard " style = "font: 7pt arial, sans-serif;">SvxLink Dashboard Ver 2.3 ©  G4NAB, SP2ONG, SP0DZ <?php $cdate=date("Y"); if ($cdate > "2021") {$cdate="2021-".date("Y");} echo $cdate; ?>
+<center><span class="dashboard-footer-note" title="Dashboard"><strong>SVXLink Dashboard SI - S58DB edition v0.1</strong> | based on SVXLink Dashboard 2.3 | original G4NAB, SP2ONG, SP0DZ <?php $cdate=date("Y"); if ($cdate > "2021") {$cdate="2021-".date("Y");} echo $cdate; ?>
 	</div>
 </div>
 </fieldset>
