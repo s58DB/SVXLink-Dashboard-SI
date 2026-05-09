@@ -575,6 +575,10 @@ input.toggle-round-flat:checked + label:after {
   text-align: center;
 }
 
+.schedule-tg-field {
+  transform: translateY(5px);
+}
+
 .schedule-actions {
   grid-column: 3 / 6;
   justify-self: center;

@@ -175,7 +175,7 @@ if (!$authorised) {
                 <?php } ?>
             </select>
         </div>
-        <div>
+        <div class="schedule-tg-field">
             <label for="schedule_tg">TG</label>
             <input type="text" id="schedule_tg" name="schedule_tg" value="<?php echo htmlspecialchars($schedule["tg"], ENT_QUOTES); ?>" />
         </div>
