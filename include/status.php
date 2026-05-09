@@ -107,15 +107,6 @@ echo "<table  style=\"margin-bottom:13px;\"><tr><th>".$fmnetwork."</th></tr><tr>
    echo $svxrstatus."</div>";}
    echo "</td></tr>";
 echo "</table>\n";
-$echolink_last_node_file = '/etc/svxlink/svxlink.d/ink_last_node.txt';
-$echolink_last_node = 'N/A';
-
-if (file_exists($echolink_last_node_file)) {
-    $val = trim(@file_get_contents($echolink_last_node_file));
-    if ($val !== '') {
-        $echolink_last_node = htmlspecialchars($val, ENT_QUOTES, 'UTF-8');
-    }
-}
 if ($modecho=="True") {
   $echolog = getEchoLog();
   $users = getConnectedEcholink($echolog);
@@ -137,26 +128,17 @@ if ($modecho=="True") {
   } else {
     echo "<tr><td colspan=\"2\" style=\"background:#ffffed;\"><div style=\"margin-top:4px;margin-bottom:4px;color:#b0b0b0;font-weight:bold;\">Not connected</div></td></tr>";
   }
-  $echocurrent = '';
-  $echolink_current_file = '/etc/svxlink/svxlink.d/ink_current_tx.txt';
-
-  if (file_exists($echolink_current_file)) {
-      $tmp = trim(@file_get_contents($echolink_current_file));
-      if ($tmp !== '') {
-          $echocurrent = htmlspecialchars($tmp, ENT_QUOTES, 'UTF-8');
-      }
-  }
-  $echotxing = '-';
-  $file = '/etc/svxlink/svxlink.d/ink_last_node.txt';
-
-  if (file_exists($file)) {
-      $tmp = trim(@file_get_contents($file));
-      if ($tmp !== '') {
-          $echotxing = htmlspecialchars($tmp, ENT_QUOTES, 'UTF-8');
-      }
+  $echocurrent = htmlspecialchars(getEchoLinkStateFileValue(array('/tmp/echolink_current_tx.txt', '/etc/svxlink/svxlink.d/echolink_current_tx.txt', '/etc/svxlink/svxlink.d/ink_current_tx.txt'), ''), ENT_QUOTES, 'UTF-8');
+  $echotxing = htmlspecialchars(getEchoLinkStateFileValue(array('/tmp/echolink_last_node.txt', '/etc/svxlink/svxlink.d/echolink_last_node.txt', '/etc/svxlink/svxlink.d/ink_last_node.txt'), '-'), ENT_QUOTES, 'UTF-8');
+  $echoserver = htmlspecialchars(getEchoLinkServer(), ENT_QUOTES, 'UTF-8');
+  if ($echocurrent === '') {
+    $echocurrent = '-';
   }
   echo "<tr><th width=\"50%\">Active Tx</th><td style=\"background:#eaffea;color:red;font-weight:bold;\">" . ($echocurrent ?: '—') . "</td></tr>";
   echo "<tr><th width=\"50%\">Last Tx</th><td style=\"background:#ffffed;color:green;font-weight:bold;\">" . $echotxing . "</td></tr>";
+  if ($echoserver !== "") {
+    echo "<tr><th width=\"50%\">Server</th><td style=\"background:#ffffed;color:#454545;font-weight:bold;\">" . $echoserver . "</td></tr>";
+  }
   echo "</table>\n";
   $svxEchoConfigFile = "/etc/svxlink/svxlink.d/ModuleEchoLink.conf";
     if (fopen($svxEchoConfigFile,'r')) { 

@@ -170,21 +170,22 @@ function getSVXRstatus() {
 //2021-06-19 20:53:19: Connected to EchoLink proxy 44.137.75.82:8100
 
 function getEchoLinkProxy() {
-	if (file_exists(SVXLOGPATH.SVXLOGPREFIX)) {
-           $elogPath = SVXLOGPATH.SVXLOGPREFIX; 
+        $echoproxy = "";
+        if (file_exists(SVXLOGPATH.SVXLOGPREFIX)) {
+           $elogPath = SVXLOGPATH.SVXLOGPREFIX;
            $echoproxy = `tail -10000 $elogPath | grep -a -h "EchoLink proxy" | tail -1`;}
-	if ($echoproxy=="" && file_exists(SVXLOGPATH.SVXLOGPREFIX.".1")) {
-           $elogPath = SVXLOGPATH.SVXLOGPREFIX.".1"; 
+        if ($echoproxy=="" && file_exists(SVXLOGPATH.SVXLOGPREFIX.".1")) {
+           $elogPath = SVXLOGPATH.SVXLOGPREFIX.".1";
            $echoproxy = `tail -10000 $elogPath | grep -a -h "EchoLink proxy" | tail -1`;}
-           if(strpos($echoproxy,"Connected to EchoLink proxy")){
-              $proxy=substr($echoproxy,strpos($echoproxy,"Connected to EchoLink proxy")+27);
-              $eproxy="Connected to proxy<br><span style=\"color:brown;font-weight:bold;\">".$proxy."</span>";
+           if(strpos($echoproxy,"Connected to EchoLink proxy") !== false){
+              $proxy=trim(substr($echoproxy,strpos($echoproxy,"Connected to EchoLink proxy")+27));
+              $eproxy="Connected to proxy<br><span style=\"color:brown;font-weight:bold;\">".htmlspecialchars($proxy, ENT_QUOTES, 'UTF-8')."</span>";
             }
-           elseif(strpos($echoproxy,"Disconnected from EchoLink proxy")){
-              $proxy=substr($echoproxy,strpos($echoproxy,"Disconnected from EchoLink proxy")+32);
-              $eproxy="<span style=\"color:red;font-weight:bold;\">Disconnected proxy</span><br><span style=\"color:brown;font-weight:bold;\">".$proxy."</span>";
+           elseif(strpos($echoproxy,"Disconnected from EchoLink proxy") !== false){
+              $proxy=trim(substr($echoproxy,strpos($echoproxy,"Disconnected from EchoLink proxy")+32));
+              $eproxy="<span style=\"color:red;font-weight:bold;\">Disconnected proxy</span><br><span style=\"color:brown;font-weight:bold;\">".htmlspecialchars($proxy, ENT_QUOTES, 'UTF-8')."</span>";
             }
-           elseif(strpos($echoproxy,"Access denied to EchoLink proxy")){
+           elseif(strpos($echoproxy,"Access denied to EchoLink proxy") !== false){
               $eproxy="Access denied to proxy";
             }
            else { $eproxy="";}
@@ -192,8 +193,60 @@ function getEchoLinkProxy() {
       return $eproxy;
 }
 
+function getEchoLinkServer() {
+        $serverLine = "";
+        $patterns = "EchoLink proxy|EchoLink directory|EchoLink server|directory server|STATUS_SERVER|status server|aprs.echolink.org|server.echolink.org";
+        $logFiles = array(SVXLOGPATH.SVXLOGPREFIX, SVXLOGPATH.SVXLOGPREFIX.".1");
+
+        foreach ($logFiles as $elogPath) {
+                if (file_exists($elogPath)) {
+                        $serverLine = `tail -10000 $elogPath | egrep -a -i -h "$patterns" | tail -1`;
+                        if (trim($serverLine) !== "") {
+                                break;
+                        }
+                }
+        }
+
+        $serverLine = trim($serverLine);
+        if ($serverLine === "") {
+                return "";
+        }
+
+        if (preg_match('/Connected to EchoLink proxy\s+(.+)$/i', $serverLine, $matches)) {
+                return "Proxy: " . trim($matches[1]);
+        }
+
+        if (preg_match('/Disconnected from EchoLink proxy\s+(.+)$/i', $serverLine, $matches)) {
+                return "Proxy disconnected: " . trim($matches[1]);
+        }
+
+        if (preg_match('/Access denied to EchoLink proxy/i', $serverLine)) {
+                return "Proxy access denied";
+        }
+
+        if (preg_match('/(?:Connected to|Connecting to|Selected|Using)\s+(?:EchoLink\s+)?(?:directory|status|server)\s*(?:server)?\s*[:=]?\s+(.+)$/i', $serverLine, $matches)) {
+                return trim($matches[1]);
+        }
+
+        return preg_replace('/^[^:]+:\s*/', '', $serverLine);
+}
+
+function getEchoLinkStateFileValue($fileNames, $default = "") {
+        foreach ($fileNames as $fileName) {
+                if (file_exists($fileName) && is_readable($fileName)) {
+                        $value = trim(@file_get_contents($fileName));
+                        if ($value !== "") {
+                                return $value;
+                        }
+                }
+        }
+
+        return $default;
+}
+
 
 function getEchoLog() {
+        $echolog = array();
 	if (file_exists(SVXLOGPATH.SVXLOGPREFIX)) {
            $elogPath = SVXLOGPATH.SVXLOGPREFIX; 
            $echolog = explode("\n",`tail -10000 $elogPath | grep -a -h "EchoLink QSO" `);}
@@ -207,17 +260,28 @@ function getConnectedEcholink($echolog) {
                 //if(strpos($ElogLine,"EchoLink QSO")){
                         //$users = Array();
                 //}
-                if(strpos($ElogLine,"state changed to CONNECTED")) {
-                        $lineParts = explode(" ", $ElogLine);
-              if (!in_array(substr($lineParts[2],0,-1), $users)) {
-                                array_push($users,trim(substr($lineParts[2],0,-1)));
+                if(strpos($ElogLine,"state changed to CONNECTED") !== false) {
+                        if (preg_match('/EchoLink QSO state changed to CONNECTED:\s*([^,\s]+)/', $ElogLine, $matches)) {
+                                $call = trim($matches[1]);
+                        } else {
+                                $lineParts = explode(" ", $ElogLine);
+                                $call = isset($lineParts[2]) ? trim(substr($lineParts[2],0,-1)) : "";
+                        }
+                        if ($call !== "" && !in_array($call, $users)) {
+                                array_push($users,$call);
                         }
                 }
-                if(strpos($ElogLine,"state changed to DISCONNECTED")) {
-                    $lineParts = explode(" ", $ElogLine);
-    		    $call=substr($lineParts[2],0,-1);
-        	    $pos = array_search($call, $users);
-                    array_splice($users, $pos, 1);
+                if(strpos($ElogLine,"state changed to DISCONNECTED") !== false) {
+                    if (preg_match('/EchoLink QSO state changed to DISCONNECTED:\s*([^,\s]+)/', $ElogLine, $matches)) {
+                            $call = trim($matches[1]);
+                    } else {
+                            $lineParts = explode(" ", $ElogLine);
+                            $call = isset($lineParts[2]) ? trim(substr($lineParts[2],0,-1)) : "";
+                    }
+                    $pos = array_search($call, $users);
+                    if ($pos !== false) {
+                            array_splice($users, $pos, 1);
+                    }
                 }
         }
         return $users;
