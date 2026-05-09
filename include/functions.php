@@ -259,7 +259,7 @@ function getSVXTGTMP() {
         return $tgselect;
 }
 
-function isRecentSVXTimestamp($timestamp, $maxAgeSeconds = 300, $futureSkewSeconds = 10800) {
+function isRecentSVXTimestamp($timestamp, $maxAgeSeconds = 300) {
         $parsedTimestamp = strtotime($timestamp);
 
         if ($parsedTimestamp === false) {
@@ -268,10 +268,10 @@ function isRecentSVXTimestamp($timestamp, $maxAgeSeconds = 300, $futureSkewSecon
 
         $ageSeconds = time() - $parsedTimestamp;
 
-        return $ageSeconds >= -$futureSkewSeconds && $ageSeconds <= $maxAgeSeconds;
+        return $ageSeconds >= 0 && $ageSeconds <= $maxAgeSeconds;
 }
 
-function isRecentSVXStopTimestamp($timestamp, $maxAgeSeconds = 20, $futureSkewSeconds = 10800) {
+function isRecentSVXStopTimestamp($timestamp, $maxAgeSeconds = 20) {
         $parsedTimestamp = strtotime($timestamp);
 
         if ($parsedTimestamp === false) {
@@ -280,7 +280,7 @@ function isRecentSVXStopTimestamp($timestamp, $maxAgeSeconds = 20, $futureSkewSe
 
         $ageSeconds = time() - $parsedTimestamp;
 
-        return $ageSeconds >= -$futureSkewSeconds && $ageSeconds <= $maxAgeSeconds;
+        return $ageSeconds >= 0 && $ageSeconds <= $maxAgeSeconds;
 }
 
 function getSVXTimestampFromLogLine($logLine) {
@@ -297,14 +297,6 @@ function getSVXTimestampFromLogLine($logLine) {
         }
 
         return substr($logLine, 0, 19);
-}
-
-function getSVXDisplayTime($timestamp) {
-        if (preg_match('/(\d{2}:\d{2}:\d{2})/', $timestamp, $matches)) {
-                return $matches[1];
-        }
-
-        return substr($timestamp, -8);
 }
 
 function initModuleArray() {
