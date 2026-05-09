@@ -15,6 +15,7 @@ include_once "include/auth.php";
     <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="expires" content="0" />
     <meta http-equiv="pragma" content="no-cache" />
+    <meta http-equiv="refresh" content="1" />
     <link rel="shortcut icon" href="images/favicon.ico" sizes="16x16 32x32" type="image/png">
     <link href="css/css.php" type="text/css" rel="stylesheet" />
     <?php echo ("<title>" . $callsign ." SVXReflector Debug</title>" ); ?>

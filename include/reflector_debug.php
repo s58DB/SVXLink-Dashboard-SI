@@ -42,11 +42,31 @@ array_multisort($sortedLogLines, SORT_DESC);
 
 $heardList = getHeardList($sortedLogLines);
 $lastHeardDebug = getLastHeard($sortedLogLines);
+$latestEvents = array();
+foreach ($sortedLogLines as $line) {
+    if (!preg_match('/Talker (start|stop) on TG #([^:]+):\s*(.+)$/', $line, $matches)) {
+        continue;
+    }
+
+    $callsign = trim($matches[3]);
+    $tg = 'TG ' . trim($matches[2]);
+    $key = $callsign . '#' . $tg;
+
+    if (!isset($latestEvents[$key])) {
+        $latestEvents[$key] = array(
+            'callsign' => $callsign,
+            'tg' => $tg,
+            'event' => strtoupper($matches[1]),
+            'line' => $line,
+        );
+    }
+}
 ?>
 <span style="font-weight:bold;font-size:14px;">SVXReflector Activity Debug</span>
 <fieldset style="width:850px;box-shadow:5px 5px 20px #999;background-color:#e8e8e8e8;margin-top:10px;font-size:12px;border-radius:10px;">
   <p style="text-align:left;margin:8px 10px;">
     Ta stran samo bere log in prikaze, kako obstojece funkcije sestavijo SVXReflector Activity tabelo.
+    Samodejno se osvezi vsako sekundo. Refresh: <?php echo reflector_debug_h(date('H:i:s')); ?>
   </p>
 
   <h3 style="text-align:left;margin-left:10px;">Končni getLastHeard()</h3>
@@ -67,6 +87,24 @@ $lastHeardDebug = getLastHeard($sortedLogLines);
       <td><?php echo reflector_debug_h($row[3]); ?></td>
       <td><?php echo reflector_debug_h($row[4]); ?></td>
       <td><?php echo $row[3] === "ON" ? "DA" : "NE"; ?></td>
+    </tr>
+<?php } ?>
+  </table>
+
+  <h3 style="text-align:left;margin-left:10px;">Zadnji raw dogodek po callsign+TG</h3>
+  <table style="width:830px;margin:0 10px 14px 10px;">
+    <tr>
+      <th>Callsign</th>
+      <th>TG</th>
+      <th>Event</th>
+      <th>Raw line</th>
+    </tr>
+<?php foreach (array_slice($latestEvents, 0, 30) as $event) { ?>
+    <tr>
+      <td><b><?php echo reflector_debug_h($event['callsign']); ?></b></td>
+      <td><?php echo reflector_debug_h($event['tg']); ?></td>
+      <td><?php echo reflector_debug_h($event['event']); ?></td>
+      <td><code><?php echo reflector_debug_h($event['line']); ?></code></td>
     </tr>
 <?php } ?>
   </table>
