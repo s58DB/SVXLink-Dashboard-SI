@@ -43,7 +43,7 @@ include "include/settings.php";
 <div class="container"> 
 <div class="header">
 <div class="parent">
-    <div class="img" style = "padding-left:30px"><img src="images/svxlinks5_logo_no_begground.png" /></div>
+    <div class="img" style = "padding-left:30px"><img src="images/svxlinks5_logo_no_background.png" /></div>
     <div class="text"style = "padding-right:230px">
 <center><p style = "margin-top:5px;margin-bottom:0px;">
 <?php
