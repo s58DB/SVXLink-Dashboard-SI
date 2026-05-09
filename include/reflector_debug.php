@@ -32,6 +32,21 @@ function reflector_debug_rows($rows, $limit = 30) {
     }
 }
 
+function reflector_debug_recent_log_lines($limit = 80) {
+    $logPath = SVXLOGPATH . SVXLOGPREFIX;
+
+    if (!file_exists($logPath)) {
+        return array("Log file not found: " . $logPath);
+    }
+
+    $output = shell_exec('tail -' . intval($limit) . ' ' . escapeshellarg($logPath) . ' 2>&1');
+    if ($output === null || $output === false || $output === '') {
+        return array("No output from tail for: " . $logPath);
+    }
+
+    return explode("\n", trim($output));
+}
+
 $rawLogLines = getSVXLog();
 $rawLogLines = array_values(array_filter($rawLogLines, function ($line) {
     return trim((string)$line) !== '';
@@ -42,6 +57,7 @@ array_multisort($sortedLogLines, SORT_DESC);
 
 $heardList = getHeardList($sortedLogLines);
 $lastHeardDebug = getLastHeard($sortedLogLines);
+$recentLogLines = reflector_debug_recent_log_lines(80);
 $latestEvents = array();
 foreach ($sortedLogLines as $line) {
     if (!preg_match('/Talker (start|stop) on TG #([^:]+):\s*(.+)$/', $line, $matches)) {
@@ -78,8 +94,11 @@ foreach ($sortedLogLines as $line) {
       <th>TX</th>
       <th>Source</th>
       <th>tx.gif?</th>
+      <th>strtotime</th>
+      <th>diff now</th>
     </tr>
 <?php foreach (array_slice($lastHeardDebug, 0, 20) as $row) { ?>
+<?php $parsedTime = strtotime($row[0]); ?>
     <tr>
       <td><?php echo reflector_debug_h($row[0]); ?></td>
       <td><b><?php echo reflector_debug_h($row[1]); ?></b></td>
@@ -87,6 +106,8 @@ foreach ($sortedLogLines as $line) {
       <td><?php echo reflector_debug_h($row[3]); ?></td>
       <td><?php echo reflector_debug_h($row[4]); ?></td>
       <td><?php echo $row[3] === "ON" ? "DA" : "NE"; ?></td>
+      <td><?php echo $parsedTime === false ? "false" : reflector_debug_h(date('Y-m-d H:i:s', $parsedTime)); ?></td>
+      <td><?php echo $parsedTime === false ? "-" : reflector_debug_h(time() - $parsedTime); ?></td>
     </tr>
 <?php } ?>
   </table>
@@ -117,16 +138,26 @@ foreach ($sortedLogLines as $line) {
       <th>TG</th>
       <th>TX</th>
       <th>Key</th>
+      <th>strtotime</th>
+      <th>diff now</th>
     </tr>
 <?php foreach (array_slice($heardList, 0, 50) as $row) { ?>
+<?php $parsedTime = strtotime($row[0]); ?>
     <tr>
       <td><?php echo reflector_debug_h($row[0]); ?></td>
       <td><b><?php echo reflector_debug_h($row[1]); ?></b></td>
       <td><?php echo reflector_debug_h($row[2]); ?></td>
       <td><?php echo reflector_debug_h($row[3]); ?></td>
       <td><?php echo reflector_debug_h($row[1] . "#" . $row[2]); ?></td>
+      <td><?php echo $parsedTime === false ? "false" : reflector_debug_h(date('Y-m-d H:i:s', $parsedTime)); ?></td>
+      <td><?php echo $parsedTime === false ? "-" : reflector_debug_h(time() - $parsedTime); ?></td>
     </tr>
 <?php } ?>
+  </table>
+
+  <h3 style="text-align:left;margin-left:10px;">Zadnjih 80 raw log vrstic</h3>
+  <table style="width:830px;margin:0 10px 14px 10px;">
+<?php reflector_debug_rows(array_reverse($recentLogLines), 80); ?>
   </table>
 
   <h3 style="text-align:left;margin-left:10px;">Sortirane raw Talker vrstice</h3>
