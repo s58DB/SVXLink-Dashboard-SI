@@ -466,9 +466,36 @@ function get_string_between($string, $start, $end) {
     return substr($string,$ini,$len);
 }
 
+function getSVXLogLineSortTime($logLine) {
+        if (preg_match('/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}):/', $logLine, $matches)) {
+                $timestamp = strtotime($matches[1]);
+        }
+        elseif (preg_match('/^([A-Z][a-z]{2} [A-Z][a-z]{2}\s+\d{1,2} \d{2}:\d{2}:\d{2} \d{4}):/', $logLine, $matches)) {
+                $timestamp = strtotime($matches[1]);
+        }
+        else {
+                $timestamp = strtotime(substr($logLine, 0, 19));
+        }
+
+        return $timestamp === false ? 0 : $timestamp;
+}
+
+function sortSVXLogLinesNewestFirst(&$logLines) {
+        usort($logLines, function ($a, $b) {
+                $timeA = getSVXLogLineSortTime($a);
+                $timeB = getSVXLogLineSortTime($b);
+
+                if ($timeA == $timeB) {
+                        return strcmp($b, $a);
+                }
+
+                return $timeB <=> $timeA;
+        });
+}
+
 $logLinesSVX = getSVXLog();
 $reverseLogLinesSVX = $logLinesSVX;
-array_multisort($reverseLogLinesSVX,SORT_DESC);
+sortSVXLogLinesNewestFirst($reverseLogLinesSVX);
 $lastHeard = getLastHeard($reverseLogLinesSVX);
 function build_ini_string(array $a) {
         $out = '';

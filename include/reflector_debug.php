@@ -53,7 +53,7 @@ $rawLogLines = array_values(array_filter($rawLogLines, function ($line) {
 }));
 
 $sortedLogLines = $rawLogLines;
-array_multisort($sortedLogLines, SORT_DESC);
+sortSVXLogLinesNewestFirst($sortedLogLines);
 
 $heardList = getHeardList($sortedLogLines);
 $lastHeardDebug = getLastHeard($sortedLogLines);
