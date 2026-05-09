@@ -566,9 +566,12 @@ input.toggle-round-flat:checked + label:after {
 }
 
 .schedule-panel input[type="submit"] {
-  width: 100%;
+  display: block;
+  width: auto;
+  min-width: 124px;
   height: auto;
   min-height: 31px;
+  margin: 0 auto;
   padding: 6px 10px;
   font-size: 12px;
   line-height: 1.2;
