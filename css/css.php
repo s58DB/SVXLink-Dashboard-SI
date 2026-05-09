@@ -565,6 +565,16 @@ input.toggle-round-flat:checked + label:after {
   width: auto;
 }
 
+.schedule-grid input[type="text"],
+.schedule-grid input[type="number"],
+.schedule-grid input[type="date"] {
+  width: 100%;
+}
+
+#schedule_tg {
+  text-align: center;
+}
+
 .schedule-actions {
   grid-column: 3 / 6;
   justify-self: center;
