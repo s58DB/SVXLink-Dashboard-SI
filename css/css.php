@@ -529,7 +529,7 @@ input.toggle-round-flat:checked + label:after {
 
 .schedule-grid {
   display: grid;
-  grid-template-columns: minmax(168px, 1.15fr) 96px 62px 62px 138px 118px 70px;
+  grid-template-columns: minmax(150px, 1fr) 96px 58px 58px 132px 110px 76px 60px;
   align-items: end;
   justify-content: center;
   gap: 8px 10px;

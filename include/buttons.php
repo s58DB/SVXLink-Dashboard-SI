@@ -7,12 +7,13 @@ include_once __DIR__ . "/auth.php";
 $scheduleConfigFile = __DIR__ . "/config.schedule.php";
 $schedule = array(
     "enabled" => false,
-    "mode" => "first_wednesday",
+    "mode" => "once",
     "tg" => "293",
     "hour" => "20",
     "minute" => "00",
     "date" => date("Y-m-d"),
     "weekday" => "3",
+    "monthday" => "1",
 );
 
 if (file_exists($scheduleConfigFile)) {
@@ -21,12 +22,13 @@ if (file_exists($scheduleConfigFile)) {
 
 $schedule = array_merge(array(
     "enabled" => false,
-    "mode" => "first_wednesday",
+    "mode" => "once",
     "tg" => "293",
     "hour" => "20",
     "minute" => "00",
     "date" => date("Y-m-d"),
     "weekday" => "3",
+    "monthday" => "1",
 ), $schedule);
 
 function installScheduleCron($schedule) {
@@ -55,9 +57,9 @@ if (isset($_POST["save_schedule"]) && !$authorised) {
 }
 
 if (isset($_POST["save_schedule"]) && $authorised) {
-    $mode = isset($_POST["schedule_mode"]) ? $_POST["schedule_mode"] : "first_wednesday";
-    if (!in_array($mode, array("first_wednesday", "once", "weekly"), true)) {
-        $mode = "first_wednesday";
+    $mode = isset($_POST["schedule_mode"]) ? $_POST["schedule_mode"] : "once";
+    if (!in_array($mode, array("once", "weekly", "monthly"), true)) {
+        $mode = "once";
     }
 
     $date = isset($_POST["schedule_date"]) ? $_POST["schedule_date"] : date("Y-m-d");
@@ -70,6 +72,7 @@ if (isset($_POST["save_schedule"]) && $authorised) {
     }
 
     $weekday = isset($_POST["schedule_weekday"]) ? $_POST["schedule_weekday"] : "3";
+    $monthday = isset($_POST["schedule_monthday"]) ? $_POST["schedule_monthday"] : "1";
 
     $schedule = array(
         "enabled" => isset($_POST["schedule_enabled"]),
@@ -79,6 +82,7 @@ if (isset($_POST["save_schedule"]) && $authorised) {
         "minute" => str_pad((string) min(59, max(0, (int) $_POST["schedule_minute"])), 2, "0", STR_PAD_LEFT),
         "date" => $date,
         "weekday" => (string) min(7, max(1, (int) $weekday)),
+        "monthday" => (string) min(31, max(1, (int) $monthday)),
     );
 
     if ($schedule["tg"] === "") {
@@ -99,9 +103,9 @@ if (isset($_POST["save_schedule"]) && $authorised) {
 
 $cronLine = $schedule["minute"] . " " . $schedule["hour"] . " * * * svxlink /usr/bin/php /var/www/html/scripts/tg_schedule_runner.php";
 $scheduleModeLabels = array(
-    "first_wednesday" => "Prva sreda v mesecu",
     "once" => "Enkratni datum",
-    "weekly" => "Tedensko",
+    "weekly" => "Enkrat tedensko",
+    "monthly" => "Enkrat na mesec",
 );
 $weekdayLabels = array(
     "1" => "Ponedeljek",
@@ -112,11 +116,18 @@ $weekdayLabels = array(
     "6" => "Sobota",
     "7" => "Nedelja",
 );
+if ($schedule["mode"] === "first_wednesday") {
+    $schedule["mode"] = "monthly";
+    $schedule["monthday"] = "1";
+}
 if (!isset($scheduleModeLabels[$schedule["mode"]])) {
-    $schedule["mode"] = "first_wednesday";
+    $schedule["mode"] = "once";
 }
 if (!isset($weekdayLabels[$schedule["weekday"]])) {
     $schedule["weekday"] = "3";
+}
+if (!isset($schedule["monthday"]) || (int) $schedule["monthday"] < 1 || (int) $schedule["monthday"] > 31) {
+    $schedule["monthday"] = "1";
 }
 $scheduleDescription = $scheduleModeLabels[$schedule["mode"]];
 if ($schedule["mode"] === "once") {
@@ -124,6 +135,9 @@ if ($schedule["mode"] === "once") {
 }
 if ($schedule["mode"] === "weekly") {
     $scheduleDescription .= ": " . $weekdayLabels[$schedule["weekday"]];
+}
+if ($schedule["mode"] === "monthly") {
+    $scheduleDescription .= ": " . $schedule["monthday"] . ". dan v mesecu";
 }
 ?>
 
@@ -168,7 +182,7 @@ if (!$authorised) {
     <p class="control-panel-title">Schedule povezave</p>
     <div class="schedule-grid">
         <div>
-            <label for="schedule_mode">Nacin</label>
+            <label for="schedule_mode">Način</label>
             <select id="schedule_mode" name="schedule_mode">
                 <?php foreach ($scheduleModeLabels as $mode => $label) { ?>
                     <option value="<?php echo htmlspecialchars($mode, ENT_QUOTES); ?>" <?php echo $schedule["mode"] === $mode ? "selected" : ""; ?>><?php echo htmlspecialchars($label, ENT_QUOTES); ?></option>
@@ -200,6 +214,10 @@ if (!$authorised) {
             </select>
         </div>
         <div>
+            <label for="schedule_monthday">Dan mes.</label>
+            <input type="number" id="schedule_monthday" name="schedule_monthday" min="1" max="31" value="<?php echo htmlspecialchars($schedule["monthday"], ENT_QUOTES); ?>" />
+        </div>
+        <div>
             <label for="schedule_enabled">Aktivno</label>
             <input type="checkbox" id="schedule_enabled" name="schedule_enabled" <?php echo $schedule["enabled"] ? "checked" : ""; ?> />
         </div>
@@ -208,7 +226,7 @@ if (!$authorised) {
         </div>
     </div>
     <p class="schedule-status">
-        Izbran nacin: <?php echo htmlspecialchars($scheduleDescription, ENT_QUOTES); ?>.
+        Izbran način: <?php echo htmlspecialchars($scheduleDescription, ENT_QUOTES); ?>.
         DTMF ob izvedbi: <?php echo "91" . htmlspecialchars($schedule["tg"], ENT_QUOTES) . "#"; ?>.
         Cron vrstica za streznik:
         <code class="schedule-cron"><?php echo htmlspecialchars($cronLine, ENT_QUOTES); ?></code>
