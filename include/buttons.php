@@ -203,7 +203,7 @@ if (!$authorised) {
             <label for="schedule_enabled">Aktivno</label>
             <input type="checkbox" id="schedule_enabled" name="schedule_enabled" <?php echo $schedule["enabled"] ? "checked" : ""; ?> />
         </div>
-        <div>
+        <div class="schedule-actions">
             <input type="submit" name="save_schedule" value="Shrani schedule" class="blue" />
         </div>
     </div>

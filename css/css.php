@@ -529,7 +529,7 @@ input.toggle-round-flat:checked + label:after {
 
 .schedule-grid {
   display: grid;
-  grid-template-columns: minmax(170px, 1.2fr) 70px 65px 65px 140px 120px 124px;
+  grid-template-columns: minmax(168px, 1.15fr) 58px 62px 62px 138px 118px 70px;
   align-items: end;
   justify-content: center;
   gap: 8px 10px;
@@ -563,6 +563,11 @@ input.toggle-round-flat:checked + label:after {
 
 .schedule-grid input[type="checkbox"] {
   width: auto;
+}
+
+.schedule-actions {
+  grid-column: 3 / 6;
+  justify-self: center;
 }
 
 .schedule-panel input[type="submit"] {
