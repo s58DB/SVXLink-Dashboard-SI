@@ -82,7 +82,9 @@ foreach ($sortedLogLines as $line) {
 <fieldset style="width:850px;box-shadow:5px 5px 20px #999;background-color:#e8e8e8e8;margin-top:10px;font-size:12px;border-radius:10px;">
   <p style="text-align:left;margin:8px 10px;">
     Ta stran samo bere log in prikaze, kako obstojece funkcije sestavijo SVXReflector Activity tabelo.
-    Samodejno se osvezi vsako sekundo. Refresh: <?php echo reflector_debug_h(date('H:i:s')); ?>
+    Refresh: <?php echo reflector_debug_h(date('H:i:s')); ?> |
+    <a href="/reflector_debug.php?live=1">Live refresh</a> |
+    <a href="/reflector_debug.php">Pause za kopiranje</a>
   </p>
 
   <h3 style="text-align:left;margin-left:10px;">Končni getLastHeard()</h3>
