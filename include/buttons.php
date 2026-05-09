@@ -201,11 +201,11 @@ if (!$authorised) {
             <label for="schedule_minute">Min</label>
             <input type="number" id="schedule_minute" name="schedule_minute" min="0" max="59" value="<?php echo htmlspecialchars($schedule["minute"], ENT_QUOTES); ?>" />
         </div>
-        <div>
+        <div class="schedule-mode-field schedule-mode-once">
             <label for="schedule_date">Datum</label>
             <input type="date" id="schedule_date" name="schedule_date" value="<?php echo htmlspecialchars($schedule["date"], ENT_QUOTES); ?>" />
         </div>
-        <div>
+        <div class="schedule-mode-field schedule-mode-weekly">
             <label for="schedule_weekday">Dan</label>
             <select id="schedule_weekday" name="schedule_weekday">
                 <?php foreach ($weekdayLabels as $weekday => $label) { ?>
@@ -213,7 +213,7 @@ if (!$authorised) {
                 <?php } ?>
             </select>
         </div>
-        <div>
+        <div class="schedule-mode-field schedule-mode-monthly">
             <label for="schedule_monthday">Dan mes.</label>
             <input type="number" id="schedule_monthday" name="schedule_monthday" min="1" max="31" value="<?php echo htmlspecialchars($schedule["monthday"], ENT_QUOTES); ?>" />
         </div>
@@ -232,6 +232,29 @@ if (!$authorised) {
         <code class="schedule-cron"><?php echo htmlspecialchars($cronLine, ENT_QUOTES); ?></code>
     </p>
 </form>
+
+<script type="text/javascript">
+(function() {
+    function updateScheduleModeFields() {
+        var mode = document.getElementById("schedule_mode").value;
+        var fields = document.querySelectorAll(".schedule-mode-field");
+        for (var i = 0; i < fields.length; i++) {
+            fields[i].style.display = "none";
+        }
+
+        var activeFields = document.querySelectorAll(".schedule-mode-" + mode);
+        for (var j = 0; j < activeFields.length; j++) {
+            activeFields[j].style.display = "";
+        }
+    }
+
+    var modeSelect = document.getElementById("schedule_mode");
+    if (modeSelect) {
+        modeSelect.addEventListener("change", updateScheduleModeFields);
+        updateScheduleModeFields();
+    }
+})();
+</script>
 
 <?php
 }
