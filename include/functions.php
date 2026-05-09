@@ -259,16 +259,6 @@ function getSVXTGTMP() {
         return $tgselect;
 }
 
-function isRecentSVXTimestamp($timestamp, $maxAgeSeconds = 300) {
-        $parsedTimestamp = strtotime($timestamp);
-
-        if ($parsedTimestamp === false) {
-                return true;
-        }
-
-        return (time() - $parsedTimestamp) <= $maxAgeSeconds;
-}
-
 function initModuleArray() {
     $modules = Array();
     foreach (SVXMODULES as $enabled) {
@@ -336,10 +326,13 @@ function getHeardList($logLines) {
                  $calltemp = substr($logLine,strpos($logLine,"TG")+4,27);
 		 $callsign = substr($calltemp,strpos($calltemp,":")+1,27);
 		 $callsign = trim($callsign);
-		 $target = "TG ".trim(get_string_between($logLine, "#", ":"));
+                 $target = "TG ".trim(get_string_between($logLine, "#", ":"));
 		 $source = "SVXRef";
 		 $timestamp = substr($logLine, 0, 19);
-                 if (!isRecentSVXTimestamp($timestamp)) {
+                 $tmss=strtotime($timestamp);
+                 $tmst=strtotime('now');
+		 $diff=$tmst-$tmss;
+                 if ($diff>300) {
                 	$tx="OFF"; 
 		    } else { $tx="ON";}
                 } 
