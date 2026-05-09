@@ -2,8 +2,29 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-include_once "../include/functions.php";
-include_once "../include/config.php";
+include_once __DIR__ . "/../include/functions.php";
+include_once __DIR__ . "/../include/config.php";
+
+function checkAuth($username, $password)
+{
+    if ($username == PHP_AUTH_USER && $password == PHP_AUTH_PW) {
+        $_SESSION['auth'] = "AUTHORISED";
+    } else {
+        $_SESSION['auth'] = "UNAUTHORISED";
+    }
+}
+
+$username = '';
+$password = '';
+$authChanged = false;
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $username = $_POST['username'] ?? '';
+    $password = $_POST['password'] ?? '';
+    checkAuth($username, $password);
+    session_write_close();
+    $authChanged = true;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -81,28 +102,10 @@ include_once "../include/config.php";
     <fieldset>
         <div class="container">
             <?php
-            if ($_SESSION['auth'] === 'AUTHORISED') {
+            if (isset($_SESSION['auth']) && $_SESSION['auth'] === 'AUTHORISED') {
                 echo '<h1 style="color:#00ff00;">Authorised</h1>';
             } else {
                 echo '<h1 style="color:#00aee8;">Authorise</h1>';
-            }
-
-            function checkAuth($username, $password)
-            {
-                if (session_status() == PHP_SESSION_NONE) session_start();
-                if ($username == PHP_AUTH_USER && $password == PHP_AUTH_PW) {
-                    $_SESSION['auth'] = "AUTHORISED";
-                } else {
-                    $_SESSION['auth'] = "UNAUTHORISED";
-                }
-                session_write_close();
-            }
-
-            if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-                include_once "../include/config.php";
-                $username = $_POST['username'] ?? '';
-                $password = $_POST['password'] ?? '';
-                checkAuth($username, $password);
             }
             ?>
             <form method="POST">
@@ -110,6 +113,13 @@ include_once "../include/config.php";
                 <input type="password" id="password" name="password" placeholder="Password" value="<?php echo $password ?? ''; ?>"><br>
                 <input type="submit" value="Submit">
             </form>
+            <?php if ($authChanged && isset($_SESSION['auth']) && $_SESSION['auth'] === 'AUTHORISED') { ?>
+                <script>
+                    if (window.parent && window.parent !== window) {
+                        window.parent.location.reload();
+                    }
+                </script>
+            <?php } ?>
         </div>
     </fieldset>
 </body>
