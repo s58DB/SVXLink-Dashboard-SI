@@ -276,20 +276,27 @@ function getEchoLinkLogLine($pattern) {
 
 function getEchoLinkConnectedNodesFromLog() {
         $line = getEchoLinkLogLine("EchoLink: no connected stations|EchoLink: single connected station|EchoLink: multiple connected stations");
+        $result = array("known" => false, "nodes" => array());
 
-        if ($line === "" || strpos($line, "no connected stations") !== false) {
-                return array();
+        if ($line === "") {
+                return $result;
+        }
+
+        $result["known"] = true;
+
+        if (strpos($line, "no connected stations") !== false) {
+                return $result;
         }
 
         if (preg_match('/EchoLink: single connected station =\s*(.+)$/', $line, $matches) ||
             preg_match('/EchoLink: multiple connected stations =\s*(.+)$/', $line, $matches)) {
                 $nodes = preg_split('/[\s,]+/', trim($matches[1]));
-                return array_values(array_filter(array_map('trim', $nodes), function($node) {
+                $result["nodes"] = array_values(array_filter(array_map('trim', $nodes), function($node) {
                         return $node !== "" && $node !== "-";
                 }));
         }
 
-        return array();
+        return $result;
 }
 
 function getEchoLinkCurrentTxFromLog() {
@@ -329,22 +336,22 @@ function getConnectedEcholink($echolog) {
                         //$users = Array();
                 //}
                 if(strpos($ElogLine,"state changed to CONNECTED") !== false) {
-                        if (preg_match('/EchoLink QSO state changed to CONNECTED:\s*([^,\s]+)/', $ElogLine, $matches)) {
+                        if (preg_match('/:\s*([^:\s]+):\s*EchoLink QSO state changed to CONNECTED\b/', $ElogLine, $matches) ||
+                            preg_match('/EchoLink QSO state changed to CONNECTED:\s*([^,\s]+)/', $ElogLine, $matches)) {
                                 $call = trim($matches[1]);
                         } else {
-                                $lineParts = explode(" ", $ElogLine);
-                                $call = isset($lineParts[2]) ? trim(substr($lineParts[2],0,-1)) : "";
+                                $call = "";
                         }
                         if ($call !== "" && !in_array($call, $users)) {
                                 array_push($users,$call);
                         }
                 }
                 if(strpos($ElogLine,"state changed to DISCONNECTED") !== false) {
-                    if (preg_match('/EchoLink QSO state changed to DISCONNECTED:\s*([^,\s]+)/', $ElogLine, $matches)) {
+                    if (preg_match('/:\s*([^:\s]+):\s*EchoLink QSO state changed to DISCONNECTED\b/', $ElogLine, $matches) ||
+                        preg_match('/EchoLink QSO state changed to DISCONNECTED:\s*([^,\s]+)/', $ElogLine, $matches)) {
                             $call = trim($matches[1]);
                     } else {
-                            $lineParts = explode(" ", $ElogLine);
-                            $call = isset($lineParts[2]) ? trim(substr($lineParts[2],0,-1)) : "";
+                            $call = "";
                     }
                     $pos = array_search($call, $users);
                     if ($pos !== false) {
