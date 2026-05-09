@@ -16,6 +16,30 @@ mixin Module
 # Load common EchoLink functions used both here and for remote events
 sourceTclWithOverrides "EchoLinkCommon.tcl"
 
+proc writeDashboardState {file_names value} {
+  foreach file_name $file_names {
+    if {[catch {
+      set f [open $file_name w]
+      puts $f $value
+      close $f
+    } err]} {
+      puts "EchoLink dashboard state write failed for $file_name: $err"
+    }
+  }
+}
+
+proc writeEchoLinkCurrentTx {value} {
+  writeDashboardState [list "/tmp/echolink_current_tx.txt" "/dev/shm/echolink_current_tx.txt"] $value
+}
+
+proc writeEchoLinkLastTx {value} {
+  writeDashboardState [list "/tmp/echolink_last_node.txt" "/dev/shm/echolink_last_node.txt"] $value
+}
+
+proc writeEchoLinkConnectedNodes {value} {
+  writeDashboardState [list "/tmp/echolink_connected_nodes.txt" "/dev/shm/echolink_connected_nodes.txt"] $value
+}
+
 
 #
 # Executed when a request to list all connected stations is received.
@@ -126,13 +150,7 @@ proc connecting_to {call} {
 # Executed when an EchoLink connection has been terminated
 #
 proc disconnected {call} {
-  set f [open "/tmp/echolink_last_node.txt" w]
-  puts $f "-"
-  close $f
-
-  set f [open "/tmp/echolink_current_tx.txt" w]
-  puts $f ""
-  close $f
+  writeEchoLinkCurrentTx ""
 
   spellEchoLinkCallsign $call;
   playMsg "disconnected";
@@ -142,10 +160,6 @@ proc disconnected {call} {
 # Executed when an incoming EchoLink connection has been accepted.
 #
 proc remote_connected {call} {
-  set f [open "/tmp/echolink_last_node.txt" w]
-  puts $f "-"
-  close $f
-
   playMsg "connected";
   spellEchoLinkCallsign $call;
 }
@@ -155,10 +169,6 @@ proc remote_connected {call} {
 #   call - The callsign of the remote station
 #
 proc connected {call} {
-  set f [open "/tmp/echolink_last_node.txt" w]
-  puts $f "-"
-  close $f
-
   playMsg "connected";
 }
 
@@ -168,34 +178,21 @@ proc connected {call} {
 #   client_list - List of connected clients
 #
 proc client_list_changed {client_list} {
-  set current_file "/tmp/echolink_current_tx.txt"
-  set last_file "/tmp/echolink_last_node.txt"
-
   set count [llength $client_list]
 
   if {$count == 0} {
-    set f [open $current_file w]
-    puts $f ""
-    close $f
-
-    set f [open $last_file w]
-    puts $f "-"
-    close $f
+    writeEchoLinkCurrentTx ""
+    writeEchoLinkConnectedNodes ""
 
     puts "EchoLink: no connected stations"
   } elseif {$count == 1} {
     set only_call [lindex $client_list 0]
 
-    set f [open $current_file w]
-    puts $f $only_call
-    close $f
-
-    set f [open $last_file w]
-    puts $f $only_call
-    close $f
+    writeEchoLinkConnectedNodes $only_call
 
     puts "EchoLink: single connected station = $only_call"
   } else {
+    writeEchoLinkConnectedNodes $client_list
     puts "EchoLink: multiple connected stations = $client_list"
   }
 }
@@ -402,23 +399,13 @@ proc reject_outgoing_connection {call} {
 #   call - The callsign of the remote station
 #
 proc is_receiving {rx call} {
-  set current_file "/tmp/echolink_current_tx.txt"
-  set last_file "/tmp/echolink_last_node.txt"
-
   if {$rx} {
-    set f [open $current_file w]
-    puts $f $call
-    close $f
-
-    set f [open $last_file w]
-    puts $f $call
-    close $f
+    writeEchoLinkCurrentTx $call
+    writeEchoLinkLastTx $call
 
     puts "EchoLink TX START: $call"
   } else {
-    set f [open $current_file w]
-    puts $f ""
-    close $f
+    writeEchoLinkCurrentTx ""
 
     puts "EchoLink TX STOP: $call"
   }

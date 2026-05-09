@@ -244,6 +244,20 @@ function getEchoLinkStateFileValue($fileNames, $default = "") {
         return $default;
 }
 
+function getEchoLinkStateFileList($fileNames) {
+        $value = getEchoLinkStateFileValue($fileNames, "");
+        if ($value === "" || $value === "-") {
+                return array();
+        }
+
+        $items = preg_split('/[\s,]+/', $value);
+        $items = array_values(array_filter(array_map('trim', $items), function($item) {
+                return $item !== "" && $item !== "-";
+        }));
+
+        return array_values(array_unique($items));
+}
+
 
 function getEchoLog() {
         $echolog = array();
