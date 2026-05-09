@@ -41,7 +41,12 @@ function installScheduleCron($schedule) {
     $command = "sudo " . escapeshellarg($script) . " " .
         escapeshellarg($enabled) . " " .
         escapeshellarg($schedule["minute"]) . " " .
-        escapeshellarg($schedule["hour"]) . " 2>&1";
+        escapeshellarg($schedule["hour"]) . " " .
+        escapeshellarg($schedule["mode"]) . " " .
+        escapeshellarg($schedule["tg"]) . " " .
+        escapeshellarg($schedule["date"]) . " " .
+        escapeshellarg($schedule["weekday"]) . " " .
+        escapeshellarg($schedule["monthday"]) . " 2>&1";
 
     $output = array();
     $returnCode = 0;
@@ -101,7 +106,6 @@ if (isset($_POST["save_schedule"]) && $authorised) {
     }
 }
 
-$cronLine = $schedule["minute"] . " " . $schedule["hour"] . " * * * svxlink /usr/bin/php /var/www/html/scripts/tg_schedule_runner.php";
 $scheduleModeLabels = array(
     "once" => "Enkratni datum",
     "weekly" => "Enkrat tedensko",
@@ -129,6 +133,25 @@ if (!isset($weekdayLabels[$schedule["weekday"]])) {
 if (!isset($schedule["monthday"]) || (int) $schedule["monthday"] < 1 || (int) $schedule["monthday"] > 31) {
     $schedule["monthday"] = "1";
 }
+$schedule["tg"] = preg_replace("/[^0-9]/", "", $schedule["tg"]);
+if ($schedule["tg"] === "") {
+    $schedule["tg"] = "293";
+}
+
+$cronMonth = "*";
+$cronDayOfMonth = "*";
+$cronDayOfWeek = "*";
+if ($schedule["mode"] === "once") {
+    $cronMonth = substr($schedule["date"], 5, 2);
+    $cronDayOfMonth = substr($schedule["date"], 8, 2);
+}
+if ($schedule["mode"] === "weekly") {
+    $cronDayOfWeek = $schedule["weekday"] === "7" ? "0" : $schedule["weekday"];
+}
+if ($schedule["mode"] === "monthly") {
+    $cronDayOfMonth = $schedule["monthday"];
+}
+$cronLine = $schedule["minute"] . " " . $schedule["hour"] . " " . $cronDayOfMonth . " " . $cronMonth . " " . $cronDayOfWeek . " svxlink /bin/echo '91" . $schedule["tg"] . "#' > /var/run/svxlink/dtmf_svx";
 $scheduleDescription = $scheduleModeLabels[$schedule["mode"]];
 if ($schedule["mode"] === "once") {
     $scheduleDescription .= ": " . $schedule["date"];
