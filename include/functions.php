@@ -266,7 +266,9 @@ function isRecentSVXTimestamp($timestamp, $maxAgeSeconds = 300) {
                 return true;
         }
 
-        return (time() - $parsedTimestamp) <= $maxAgeSeconds;
+        $ageSeconds = time() - $parsedTimestamp;
+
+        return $ageSeconds >= 0 && $ageSeconds <= $maxAgeSeconds;
 }
 
 function isRecentSVXStopTimestamp($timestamp, $maxAgeSeconds = 20) {
@@ -279,6 +281,22 @@ function isRecentSVXStopTimestamp($timestamp, $maxAgeSeconds = 20) {
         $ageSeconds = time() - $parsedTimestamp;
 
         return $ageSeconds >= 0 && $ageSeconds <= $maxAgeSeconds;
+}
+
+function getSVXTimestampFromLogLine($logLine) {
+        if (preg_match('/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}):/', $logLine, $matches)) {
+                return $matches[1];
+        }
+
+        if (preg_match('/^([A-Z][a-z]{2} [A-Z][a-z]{2}\s+\d{1,2} \d{2}:\d{2}:\d{2} \d{4}):/', $logLine, $matches)) {
+                return $matches[1];
+        }
+
+        if (preg_match('/^([A-Z][a-z]{2} [A-Z][a-z]{2}\s+\d{1,2} \d{2}:\d{2}:\d{2}):/', $logLine, $matches)) {
+                return $matches[1];
+        }
+
+        return substr($logLine, 0, 19);
 }
 
 function initModuleArray() {
@@ -343,7 +361,7 @@ function getHeardList($logLines) {
 		$callsign = trim($callsign);
                 $target = "TG ".trim(get_string_between($logLine, "#", ":"));
 		$source = "SVXRef";
-		$timestamp = substr($logLine, 0, 19);
+		$timestamp = getSVXTimestampFromLogLine($logLine);
                 $tx = isRecentSVXStopTimestamp($timestamp) ? "ON" : "OFF";
                } 
 		if ($isTalkerStart) {
@@ -352,7 +370,7 @@ function getHeardList($logLines) {
 		 $callsign = trim($callsign);
 		 $target = "TG ".trim(get_string_between($logLine, "#", ":"));
 		 $source = "SVXRef";
-		 $timestamp = substr($logLine, 0, 19);
+		 $timestamp = getSVXTimestampFromLogLine($logLine);
                  if (!isRecentSVXTimestamp($timestamp)) {
                 	$tx="OFF"; 
 		    } else { $tx="ON";}
