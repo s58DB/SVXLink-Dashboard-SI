@@ -47,7 +47,7 @@ include_once "include/tools.php";
 <div class="container"> 
 <div class="header">
 <div class="site-header-inner">
-    <div class="site-logo"><img src="images/svxlink.ico" alt="SVXLink" /></div>
+    <div class="site-logo"><img src="images/svxlinks5_logo.png" alt="SVXLink" /></div>
     <div class="site-title">
 <?php
 $svxConfigFile = '/etc/svxlink/svxlink.conf';
