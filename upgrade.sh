@@ -13,11 +13,43 @@ if [ -z "$USER_HOME" ]; then
     USER_HOME="/home/$CURRENT_USER"
 fi
 LOCAL_SCRIPT_DIR="$USER_HOME/scripts"
+SCRIPT_DIR="/var/www/html/scripts"
+SERVICE_FILE="/etc/systemd/system/svxlink-node.service"
+DTMF_SCRIPT="$LOCAL_SCRIPT_DIR/dtmf_setup.sh"
+CLEANUP_SCRIPT="$LOCAL_SCRIPT_DIR/cleanup.sh"
+CRON_JOB="01 00 * * * $CLEANUP_SCRIPT"
+ECHOLINK_DEST="/usr/share/svxlink/events.d/local/EchoLink.tcl"
+
+is_fully_installed() {
+    [ -f "$AUTH_FILE" ] || return 1
+    [ -f "$SOURCE_FILE" ] || return 1
+    [ -f "$SUDOERS_FILE" ] || return 1
+    cmp -s "$SOURCE_FILE" "$SUDOERS_FILE" || return 1
+    command -v node >/dev/null 2>&1 || return 1
+    command -v npm >/dev/null 2>&1 || return 1
+    [ -d "$SCRIPT_DIR/node_modules/ws" ] || return 1
+    [ -f "$SERVICE_FILE" ] || return 1
+    systemctl is-enabled --quiet svxlink-node.service || return 1
+    systemctl is-active --quiet svxlink-node.service || return 1
+    [ -f "$DTMF_SCRIPT" ] || return 1
+    [ -x "$DTMF_SCRIPT" ] || return 1
+    [ -f "$CLEANUP_SCRIPT" ] || return 1
+    [ -x "$CLEANUP_SCRIPT" ] || return 1
+    [ -f "$ECHOLINK_DEST" ] || return 1
+    cmp -s /var/www/html/EchoLink.tcl "$ECHOLINK_DEST" || return 1
+    crontab -l 2>/dev/null | grep -Fq "$CRON_JOB" || return 1
+    return 0
+}
 
 # Function to display an info message using whiptail
 show_info() {
   whiptail --title "Information" --msgbox "$1" 8 78
 }
+
+if is_fully_installed; then
+    show_info "Dashboard upgrade is already installed and up to date. Nothing to do."
+    exit 0
+fi
 
 
 
@@ -139,7 +171,6 @@ sudo chmod 755 "$SVXLINK_HOME"
 
 
 # Ensure ws module is installed for svxlink user in scripts folder
-SCRIPT_DIR="/var/www/html/scripts"
 if [ ! -d "$SCRIPT_DIR/node_modules/ws" ]; then
     show_info "Installing ws Node module for svxlink user..."
     sudo -u svxlink env HOME="$SVXLINK_HOME" npm --prefix "$SCRIPT_DIR" install ws
@@ -148,7 +179,6 @@ else
 fi
 
 # Create the systemd service only if it doesn't exist
-SERVICE_FILE="/etc/systemd/system/svxlink-node.service"
 if [ ! -f "$SERVICE_FILE" ]; then
     show_info "Creating svxlink-node.service..."
     sudo tee "$SERVICE_FILE" > /dev/null <<EOL
@@ -197,8 +227,6 @@ sudo systemctl is-active --quiet svxlink-node.service && show_info "svxlink-node
 # Create the local helper scripts directory if missing.
 # ==============================
 
-DTMF_SCRIPT="$LOCAL_SCRIPT_DIR/dtmf_setup.sh"
-
 if [ ! -f "$DTMF_SCRIPT" ]; then
     show_info "Creating $DTMF_SCRIPT..."
     sudo mkdir -p "$LOCAL_SCRIPT_DIR"
@@ -218,9 +246,10 @@ show_info "Running $DTMF_SCRIPT..."
 sudo "$DTMF_SCRIPT"
 # Add Modification to /usr/share/svxlink/events.d/local/EchoLink.tcl
 sudo mkdir -p /usr/share/svxlink/events.d/local
-sudo cp -f /var/www/html/EchoLink.tcl /usr/share/svxlink/events.d/local/EchoLink.tcl
+if ! cmp -s /var/www/html/EchoLink.tcl "$ECHOLINK_DEST"; then
+    sudo cp -f /var/www/html/EchoLink.tcl "$ECHOLINK_DEST"
+fi
 # New section to create cleanup.sh
-CLEANUP_SCRIPT="$LOCAL_SCRIPT_DIR/cleanup.sh"
 
 # Check if the script directory exists, if not, create it
 if [ ! -d "$LOCAL_SCRIPT_DIR" ]; then
@@ -230,8 +259,7 @@ fi
 
 # Check if the cleanup.sh script exists
 if [ -f "$CLEANUP_SCRIPT" ]; then
-    show_info "Script $CLEANUP_SCRIPT already exists. Exiting."
-    exit 0
+    show_info "Script $CLEANUP_SCRIPT already exists."
 else
     # Create the cleanup.sh script with the specified content
     echo "#!/bin/bash
@@ -253,8 +281,7 @@ fi" > "$CLEANUP_SCRIPT"
 fi
 
 # Check and add the cleanup.sh script to the sudo crontab if not already present
-CRON_JOB="01 00 * * * $CLEANUP_SCRIPT"
-( sudo crontab -l | grep -q "$CRON_JOB" ) || ( sudo crontab -l; echo "$CRON_JOB" ) | sudo crontab -
+( sudo crontab -l 2>/dev/null | grep -Fq "$CRON_JOB" ) || ( sudo crontab -l 2>/dev/null; echo "$CRON_JOB" ) | sudo crontab -
 
 # Inform the user that the crontab entry has been added if it was not present
 show_info "Ensured that the crontab entry for $CLEANUP_SCRIPT exists."
