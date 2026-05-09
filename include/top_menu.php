@@ -14,6 +14,7 @@ include_once __DIR__ . "/auth.php";
 	<a href="/audio.php">Audio</a> |
 <?php if (isAuthorised()) { ?>
 	<a href="editor.php?id=log" class="nav-alert" id="log">Log</a> |
+	<a href="/reflector_debug.php" class="nav-alert">TX Debug</a> |
 <?php } ?>
 	<a href="/authorise.php" class="nav-alert"><?php echo isAuthorised() ? "Avtoriziran" : "Prijava"; ?></a></p>
 	</div>
