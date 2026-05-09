@@ -370,7 +370,7 @@ function getHeardList($logLines) {
                 $target = "TG ".trim(get_string_between($logLine, "#", ":"));
 		$source = "SVXRef";
 		$timestamp = getSVXTimestampFromLogLine($logLine);
-                $tx = "OFF";
+                $tx = isRecentSVXStopTimestamp($timestamp) ? "ON" : "OFF";
                } 
 		if ($isTalkerStart) {
                  $calltemp = substr($logLine,strpos($logLine,"TG")+4,27);
