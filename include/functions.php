@@ -276,7 +276,9 @@ function isRecentSVXStopTimestamp($timestamp, $maxAgeSeconds = 20) {
                 return false;
         }
 
-        return (time() - $parsedTimestamp) <= $maxAgeSeconds;
+        $ageSeconds = time() - $parsedTimestamp;
+
+        return $ageSeconds >= 0 && $ageSeconds <= $maxAgeSeconds;
 }
 
 function initModuleArray() {
