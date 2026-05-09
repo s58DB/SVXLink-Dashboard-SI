@@ -269,16 +269,6 @@ function isRecentSVXTimestamp($timestamp, $maxAgeSeconds = 300) {
         return (time() - $parsedTimestamp) <= $maxAgeSeconds;
 }
 
-function isRecentSVXStopTimestamp($timestamp, $maxAgeSeconds = 20) {
-        $parsedTimestamp = strtotime($timestamp);
-
-        if ($parsedTimestamp === false) {
-                return false;
-        }
-
-        return (time() - $parsedTimestamp) <= $maxAgeSeconds;
-}
-
 function initModuleArray() {
     $modules = Array();
     foreach (SVXMODULES as $enabled) {
@@ -332,19 +322,17 @@ function getHeardList($logLines) {
 	$heardList = array();
         //print_r($logLines);
 	foreach ($logLines as $logLine) {
-		$isTalkerStop = strpos($logLine, ": Talker stop on") !== false;
-		$isTalkerStart = strpos($logLine, ": Talker start on") !== false;
-	     if($isTalkerStart || $isTalkerStop) {
-		if ($isTalkerStop) {
+	     if(strpos($logLine,"Tx1") || strpos($logLine,"Rx1") || strpos($logLine, ": Talker start on") || strpos($logLine, ": Talker stop on")) {
+		if (strpos($logLine,": Talker stop on")) {
                 $calltemp = substr($logLine,strpos($logLine,"TG")+4,27);
 		$callsign = substr($calltemp,strpos($calltemp,":")+1,27);
 		$callsign = trim($callsign);
                 $target = "TG ".trim(get_string_between($logLine, "#", ":"));
 		$source = "SVXRef";
 		$timestamp = substr($logLine, 0, 19);
-                $tx = isRecentSVXStopTimestamp($timestamp) ? "ON" : "OFF";
+                $tx="OFF";
                } 
-		if ($isTalkerStart) {
+		if (strpos($logLine,": Talker start on")) {
                  $calltemp = substr($logLine,strpos($logLine,"TG")+4,27);
 		 $callsign = substr($calltemp,strpos($calltemp,":")+1,27);
 		 $callsign = trim($callsign);
