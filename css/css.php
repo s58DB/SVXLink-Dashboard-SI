@@ -529,10 +529,12 @@ input.toggle-round-flat:checked + label:after {
 
 .schedule-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(90px, max-content));
+  grid-template-columns: minmax(170px, 1.2fr) 70px 65px 65px 140px 120px 124px;
   align-items: end;
   justify-content: center;
-  gap: 8px;
+  gap: 8px 10px;
+  max-width: 820px;
+  margin: 0 auto;
 }
 
 .schedule-grid label {
@@ -542,15 +544,35 @@ input.toggle-round-flat:checked + label:after {
   font-weight: 700;
 }
 
+.schedule-grid > div {
+  min-width: 0;
+}
+
 .schedule-grid input,
 .schedule-grid select {
   border: 1px solid #b9c8d8;
   border-radius: 4px;
+  box-sizing: border-box;
   color: #0b2f63;
   font-size: 13px;
   font-weight: 600;
   padding: 5px 7px;
+  width: 100%;
   background: #ffffff;
+}
+
+.schedule-grid input[type="checkbox"] {
+  width: auto;
+}
+
+.schedule-panel input[type="submit"] {
+  width: 100%;
+  height: auto;
+  min-height: 31px;
+  padding: 6px 10px;
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: normal;
 }
 
 .schedule-status {
