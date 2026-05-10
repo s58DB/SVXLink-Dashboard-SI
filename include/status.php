@@ -108,8 +108,16 @@ echo "<table  style=\"margin-bottom:13px;\"><tr><th>".$fmnetwork."</th></tr><tr>
    echo "</td></tr>";
 echo "</table>\n";
 if ($modecho=="True") {
-  $echolog = getEchoLog();
-  $users = getConnectedEcholink($echolog);
+  $stateUsers = getEchoLinkConnectedNodesFromLog();
+  if (count($stateUsers) == 0) {
+    $stateUsers = getEchoLinkStateFileList(array('/tmp/echolink_last_node.txt', '/etc/svxlink/svxlink.d/echolink_last_node.txt', '/etc/svxlink/svxlink.d/ink_last_node.txt'));
+  }
+  if (count($stateUsers) > 0) {
+    $users = $stateUsers;
+  } else {
+    $echolog = getEchoLog();
+    $users = getConnectedEcholink($echolog);
+  }
   $users = array_values(array_filter(array_map('trim', $users), function($u) {
     return $u !== '';
   }));
@@ -128,8 +136,11 @@ if ($modecho=="True") {
   } else {
     echo "<tr><td colspan=\"2\" style=\"background:#ffffed;\"><div style=\"margin-top:4px;margin-bottom:4px;color:#b0b0b0;font-weight:bold;\">Not connected</div></td></tr>";
   }
-  $echocurrent = htmlspecialchars(getEchoLinkStateFileValue(array('/tmp/echolink_current_tx.txt', '/etc/svxlink/svxlink.d/echolink_current_tx.txt', '/etc/svxlink/svxlink.d/ink_current_tx.txt'), ''), ENT_QUOTES, 'UTF-8');
-  $echotxing = htmlspecialchars(getEchoLinkStateFileValue(array('/tmp/echolink_last_node.txt', '/etc/svxlink/svxlink.d/echolink_last_node.txt', '/etc/svxlink/svxlink.d/ink_last_node.txt'), '-'), ENT_QUOTES, 'UTF-8');
+  $echocurrent = htmlspecialchars(getEchoLinkCurrentTxFromLog(), ENT_QUOTES, 'UTF-8');
+  $echotxing = htmlspecialchars(getEchoLinkLastTxFromLog(), ENT_QUOTES, 'UTF-8');
+  if ($echotxing === '') {
+    $echotxing = htmlspecialchars(getEchoLinkStateFileValue(array('/tmp/echolink_last_node.txt', '/etc/svxlink/svxlink.d/echolink_last_node.txt', '/etc/svxlink/svxlink.d/ink_last_node.txt'), '-'), ENT_QUOTES, 'UTF-8');
+  }
   $echoserver = htmlspecialchars(getEchoLinkServer(), ENT_QUOTES, 'UTF-8');
   if ($echocurrent === '') {
     $echocurrent = '-';

@@ -265,6 +265,74 @@ function getEchoLinkStateFileValue($fileNames, $default = "") {
         return $default;
 }
 
+function getEchoLinkStateFileList($fileNames) {
+        $value = getEchoLinkStateFileValue($fileNames, "");
+        if ($value === "" || $value === "-") {
+                return array();
+        }
+
+        $items = preg_split('/[\s,]+/', $value);
+        $items = array_values(array_filter(array_map('trim', $items), function($item) {
+                return $item !== "" && $item !== "-";
+        }));
+
+        return array_values(array_unique($items));
+}
+
+function getEchoLinkLogLine($pattern) {
+        $line = "";
+        $logFiles = array(SVXLOGPATH.SVXLOGPREFIX, SVXLOGPATH.SVXLOGPREFIX.".1");
+
+        foreach ($logFiles as $logPath) {
+                if (file_exists($logPath)) {
+                        $line = `tail -10000 $logPath | egrep -a -h "$pattern" | tail -1`;
+                        if (trim($line) !== "") {
+                                break;
+                        }
+                }
+        }
+
+        return trim($line);
+}
+
+function getEchoLinkConnectedNodesFromLog() {
+        $line = getEchoLinkLogLine("EchoLink: no connected stations|EchoLink: single connected station|EchoLink: multiple connected stations");
+
+        if ($line === "" || strpos($line, "no connected stations") !== false) {
+                return array();
+        }
+
+        if (preg_match('/EchoLink: single connected station =\s*(.+)$/', $line, $matches) ||
+            preg_match('/EchoLink: multiple connected stations =\s*(.+)$/', $line, $matches)) {
+                $nodes = preg_split('/[\s,]+/', trim($matches[1]));
+                return array_values(array_filter(array_map('trim', $nodes), function($node) {
+                        return $node !== "" && $node !== "-";
+                }));
+        }
+
+        return array();
+}
+
+function getEchoLinkCurrentTxFromLog() {
+        $line = getEchoLinkLogLine("EchoLink TX START|EchoLink TX STOP");
+
+        if (preg_match('/EchoLink TX START:\s*(.+)$/', $line, $matches)) {
+                return trim($matches[1]);
+        }
+
+        return "";
+}
+
+function getEchoLinkLastTxFromLog() {
+        $line = getEchoLinkLogLine("EchoLink TX START");
+
+        if (preg_match('/EchoLink TX START:\s*(.+)$/', $line, $matches)) {
+                return trim($matches[1]);
+        }
+
+        return "";
+}
+
 
 function getEchoLog() {
         $echolog = array();
