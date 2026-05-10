@@ -7,6 +7,29 @@ Brought up to date by Chris Jackson G4NAB with new code.</h2>
 
 <b>This installation requires that svxlink has been compiled on Debian 12 with PHP 8.2 installed. </b>
 
+<h2>S58DB fresh install</h2>
+<p>Use these steps for a clean install of this branch on a new client.</p>
+<p>In <b>/var/www</b> run:</p>
+<p><b>sudo git clone -b s58db-svxlink-dashboard https://github.com/s58DB/SVXLink-Dashboard-SI.git html</b></p>
+<p><b>cd html</b></p>
+<p>For a first install, edit the Apache environment file:</p>
+<p><b>sudo nano /etc/apache2/envvars</b></p>
+<p>Change:</p>
+<p>export APACHE_RUN_USER=www-data</p>
+<p>export APACHE_RUN_GROUP=www-data</p>
+<p>to:</p>
+<p>export APACHE_RUN_USER=svxlink</p>
+<p>export APACHE_RUN_GROUP=svxlink</p>
+<p>Then edit the Apache service file. On most Debian systems it is:</p>
+<p><b>sudo nano /usr/lib/systemd/system/apache2.service</b></p>
+<p>Locate <b>PrivateTmp=true</b> and change it to <b>PrivateTmp=false</b>.</p>
+<p>Reload systemd and restart Apache:</p>
+<p><b>sudo systemctl daemon-reload && sudo systemctl restart apache2</b></p>
+<p>Then run the dashboard setup from <b>/var/www/html</b>:</p>
+<p><b>sudo chmod +x upgrade.sh</b></p>
+<p><b>sudo ./upgrade.sh</b></p>
+<p>This branch does not install or replace <b>EchoLink.tcl</b>. EchoLink connected nodes, Active TX, Last TX, and directory server location are read from the existing SvxLink log output.</p>
+
 <p>If it has been installed with svxlinkbuilder then very little needs to be changed.</p>
 
 <p>If you are installing it manually, then you will need to read the instructions thoroughly:</p>
