@@ -194,8 +194,34 @@ function getEchoLinkProxy() {
 }
 
 function getEchoLinkServer() {
-        $serverLine = "";
+        $directoryServer = "";
         $logFiles = array(SVXLOGPATH.SVXLOGPREFIX, SVXLOGPATH.SVXLOGPREFIX.".1");
+
+        foreach ($logFiles as $elogPath) {
+                if (file_exists($elogPath)) {
+                        $lines = explode("\n", `tail -10000 $elogPath`);
+                        for ($i = count($lines) - 1; $i >= 0; $i--) {
+                                if (strpos($lines[$i], "EchoLink directory server message") !== false) {
+                                        for ($j = $i + 1; $j < count($lines) && $j <= $i + 8; $j++) {
+                                                if (preg_match('/:\s*(ECHO[0-9A-Za-z]+):\s*(.+)$/', $lines[$j], $matches)) {
+                                                        $directoryServer = trim($matches[2]);
+                                                        break 2;
+                                                }
+                                        }
+                                }
+                        }
+
+                        if ($directoryServer !== "") {
+                                break;
+                        }
+                }
+        }
+
+        if ($directoryServer !== "") {
+                return $directoryServer;
+        }
+
+        $serverLine = "";
 
         foreach ($logFiles as $elogPath) {
                 if (file_exists($elogPath)) {
