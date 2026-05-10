@@ -195,12 +195,11 @@ function getEchoLinkProxy() {
 
 function getEchoLinkServer() {
         $serverLine = "";
-        $patterns = "EchoLink proxy|EchoLink directory|EchoLink server|directory server|STATUS_SERVER|status server|aprs.echolink.org|server.echolink.org";
         $logFiles = array(SVXLOGPATH.SVXLOGPREFIX, SVXLOGPATH.SVXLOGPREFIX.".1");
 
         foreach ($logFiles as $elogPath) {
                 if (file_exists($elogPath)) {
-                        $serverLine = `tail -10000 $elogPath | egrep -a -i -h "$patterns" | tail -1`;
+                        $serverLine = `tail -10000 $elogPath | grep -a -h "EchoLink proxy" | tail -1`;
                         if (trim($serverLine) !== "") {
                                 break;
                         }
@@ -224,11 +223,7 @@ function getEchoLinkServer() {
                 return "Proxy access denied";
         }
 
-        if (preg_match('/(?:Connected to|Connecting to|Selected|Using)\s+(?:EchoLink\s+)?(?:directory|status|server)\s*(?:server)?\s*[:=]?\s+(.+)$/i', $serverLine, $matches)) {
-                return trim($matches[1]);
-        }
-
-        return preg_replace('/^[^:]+:\s*/', '', $serverLine);
+        return "";
 }
 
 function getEchoLinkStateFileValue($fileNames, $default = "") {
