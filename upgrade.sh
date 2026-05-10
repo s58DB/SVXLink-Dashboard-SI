@@ -18,7 +18,6 @@ SERVICE_FILE="/etc/systemd/system/svxlink-node.service"
 DTMF_SCRIPT="$LOCAL_SCRIPT_DIR/dtmf_setup.sh"
 CLEANUP_SCRIPT="$LOCAL_SCRIPT_DIR/cleanup.sh"
 CRON_JOB="01 00 * * * $CLEANUP_SCRIPT"
-ECHOLINK_DEST="/usr/share/svxlink/events.d/local/EchoLink.tcl"
 
 is_fully_installed() {
     [ -f "$AUTH_FILE" ] || return 1
@@ -35,8 +34,6 @@ is_fully_installed() {
     [ -x "$DTMF_SCRIPT" ] || return 1
     [ -f "$CLEANUP_SCRIPT" ] || return 1
     [ -x "$CLEANUP_SCRIPT" ] || return 1
-    [ -f "$ECHOLINK_DEST" ] || return 1
-    cmp -s /var/www/html/EchoLink.tcl "$ECHOLINK_DEST" || return 1
     crontab -l 2>/dev/null | grep -Fq "$CRON_JOB" || return 1
     return 0
 }
@@ -244,11 +241,6 @@ fi
 # Run the script immediately
 show_info "Running $DTMF_SCRIPT..."
 sudo "$DTMF_SCRIPT"
-# Add Modification to /usr/share/svxlink/events.d/local/EchoLink.tcl
-sudo mkdir -p /usr/share/svxlink/events.d/local
-if ! cmp -s /var/www/html/EchoLink.tcl "$ECHOLINK_DEST"; then
-    sudo cp -f /var/www/html/EchoLink.tcl "$ECHOLINK_DEST"
-fi
 # New section to create cleanup.sh
 
 # Check if the script directory exists, if not, create it
