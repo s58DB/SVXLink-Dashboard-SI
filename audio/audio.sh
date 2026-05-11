@@ -3,7 +3,7 @@
 set -u
 
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
-DEFAULT_AUDIO_DEVICE="${AUDIO_TEST_DEVICE:-plughw:1,0}"
+DEFAULT_AUDIO_DEVICE="${AUDIO_TEST_DEVICE:-plughw:1,1}"
 if [ -w "$SCRIPT_DIR" ]; then
     LOG_FILE="$SCRIPT_DIR/record-last.log"
 else
@@ -63,7 +63,7 @@ echo "Audio recording 10 seconds, to stop recording before 10 seconds use CTRL+C
 echo " "
 #arecord -D hw:Loopback,1,1 -V mono -r 48000 -f S16_LE -c1 -d 15 /var/www/html/audio/audio-$(date +%Y-%m-%d-%H -%M-%S).wav
 file="$SCRIPT_DIR/audio-$(date +%Y-%m-%d-%H-%M-%S).wav"
-if ! try_recording "$file" "$DEFAULT_AUDIO_DEVICE" "plughw:1,0" "plughw:Loopback,1,0" "rx_monitor"; then
+if ! try_recording "$file" "$DEFAULT_AUDIO_DEVICE" "plughw:Loop,1,0" "plughw:1,1" "plughw:1,0" "plughw:Loopback,1,0" "rx_monitor"; then
     exit 1
 fi
 
