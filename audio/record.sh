@@ -2,10 +2,20 @@
 set -u
 
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
-DEFAULT_AUDIO_DEVICE="${AUDIO_TEST_DEVICE:-plughw:Loopback,1,0}"
-LOG_FILE="$SCRIPT_DIR/record-last.log"
+DEFAULT_AUDIO_DEVICE="${AUDIO_TEST_DEVICE:-plughw:1,0}"
+if [ -w "$SCRIPT_DIR" ]; then
+    LOG_FILE="$SCRIPT_DIR/record-last.log"
+else
+    LOG_FILE="/tmp/svxlink-audio-record-last.log"
+fi
 
 exec > >(tee "$LOG_FILE") 2>&1
+
+if [ ! -w "$SCRIPT_DIR" ]; then
+    echo "Audio directory is not writable by user $(id -un): $SCRIPT_DIR" >&2
+    echo "Run this test as the web/SVXLink user or fix ownership/permissions." >&2
+    exit 1
+fi
 
 record_audio() {
     local target="$1"
@@ -45,7 +55,7 @@ rm -f "$SCRIPT_DIR"/audio-*.wav "$SCRIPT_DIR"/live.wav
 
 # Record 15 seconds from the SVXLink loopback monitor.
 file="$SCRIPT_DIR/audio-$(date +%Y-%m-%d-%H-%M-%S).wav"
-if ! try_recording "$file" "$DEFAULT_AUDIO_DEVICE" "plughw:Loopback,1,0" "plughw:1,0" "rx_monitor"; then
+if ! try_recording "$file" "$DEFAULT_AUDIO_DEVICE" "plughw:1,0" "plughw:Loopback,1,0" "rx_monitor"; then
     exit 1
 fi
 
