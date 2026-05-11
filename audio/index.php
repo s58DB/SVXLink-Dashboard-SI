@@ -85,6 +85,7 @@ if (!empty($filelist)) {
     echo '<audio id="my-audio" preload="auto" controls style="width:100%; display:block; border-radius:8px; box-sizing:border-box;">';
     echo '<source src="' . htmlspecialchars($latestUrl, ENT_QUOTES, 'UTF-8') . '?t=' . time() . '" type="audio/wav">';
     echo '</audio></div>';
+    echo '<div id="audio-status" style="font-size:12px;color:#454545;margin-top:6px;"></div>';
 } else {
     echo '<p style="font-size:12px;color:#8a4d00;">No audio recording found yet. Click the record button and transmit audio during the 15 second window.</p>';
 }
@@ -99,9 +100,22 @@ window.addEventListener('DOMContentLoaded', function() {
 
     if (myAudio && meterElement) {
         var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        // Use the MediaElementSource for playback from latest WAV
         var sourceNode = audioCtx.createMediaElementSource(myAudio);
-        webAudioPeakMeter.createMeter(meterElement, sourceNode, {});
+        var meterNode = webAudioPeakMeter.createMeterNode(sourceNode, audioCtx);
+        webAudioPeakMeter.createMeter(meterElement, meterNode, {});
+
+        var statusElement = document.getElementById('audio-status');
+        myAudio.addEventListener('canplay', function() {
+            if (statusElement) {
+                statusElement.textContent = 'Recording loaded. Press play to view the peak meter.';
+            }
+        });
+        myAudio.addEventListener('error', function() {
+            if (statusElement) {
+                statusElement.textContent = 'Browser could not load the WAV recording.';
+                statusElement.style.color = '#a00000';
+            }
+        });
         myAudio.addEventListener('play', function() {
             audioCtx.resume();
         });
