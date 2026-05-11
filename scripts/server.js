@@ -30,9 +30,12 @@ function startRecording() {
 
   record = spawn('arecord', [
     '-D', device,
+    '-t', 'raw',
     '-f', 'S16_LE',
     '-r', '48000',
-    '-c', '1'
+    '-c', '1',
+    '--buffer-time', '50000',
+    '--period-time', '10000'
   ], {
     stdio: ['ignore', 'pipe', 'pipe']
   });
