@@ -108,8 +108,9 @@ echo "<table  style=\"margin-bottom:13px;\"><tr><th>".$fmnetwork."</th></tr><tr>
    echo "</td></tr>";
 echo "</table>\n";
 if ($modecho=="True") {
-  $stateUsers = getEchoLinkConnectedNodesFromLog();
-  if (count($stateUsers) == 0) {
+  $connectedState = getEchoLinkConnectedStateFromLog();
+  $stateUsers = $connectedState["nodes"];
+  if (!$connectedState["known"] && count($stateUsers) == 0) {
     $stateUsers = getEchoLinkStateFileList(array('/tmp/echolink_last_node.txt', '/etc/svxlink/svxlink.d/echolink_last_node.txt', '/etc/svxlink/svxlink.d/ink_last_node.txt'));
   }
   if (count($stateUsers) > 0) {
