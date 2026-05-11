@@ -64,7 +64,7 @@ Brought up to date by Chris Jackson G4NAB with new code.</h2>
 <p>You will be presented with the dashboard of your device. You will need to log in under your username and password, set up during the upgrade.sh process.</p>
 
 <p>The dashboard is now ready to use. However it is recommended that you thoroughly read the man page for svxlink.conf. <i>man svxlink.conf on google </i>will find a copy, although you will find one inside your device through the terminal</p>
-<img width="945" alt="S58DB SVXLink Dashboard screenshot" src="images/dashboard-s58db.png">
+<img width="945" alt="S55USX-R SVXLink Dashboard screenshot" src="images/dashboard-s55usx-r.png">
 
 <p>The first new addition is that you will find a speaker icon "Rx Monitor" on the top left of the dashboard, on which you may click to activate to hear all outbound audio to your dekstop device.</p>
 
