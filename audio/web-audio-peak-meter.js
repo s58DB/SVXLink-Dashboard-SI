@@ -267,4 +267,6 @@ var webAudioPeakMeter = (function() {
   };
 })();
 
-module.exports = webAudioPeakMeter;
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = webAudioPeakMeter;
+}

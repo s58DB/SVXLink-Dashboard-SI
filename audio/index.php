@@ -104,8 +104,6 @@ window.addEventListener('DOMContentLoaded', function() {
         myAudio.addEventListener('play', function() {
             audioCtx.resume();
         });
-    } else {
-        console.error('Audio element or meter element not found.');
     }
 });
 
