@@ -49,20 +49,6 @@ body {
 h1, h2, h3 { line-height: 1.2; }
 a { color: #607d8b; }
 #player audio { width:100%; border-radius:8px; }
-#live-meter-wrap {
-  width:100%;
-  height:32px;
-  background:#17233a;
-  border-radius:5px;
-  overflow:hidden;
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.25);
-}
-#live-meter-bar {
-  width:0%;
-  height:100%;
-  background:linear-gradient(90deg, #1fb655 0%, #e6ce25 65%, #d33030 100%);
-  transition:width 90ms linear;
-}
 </style>
 <script src="web-audio-peak-meter.js"></script>
 </head>
@@ -84,13 +70,6 @@ a { color: #607d8b; }
       </fieldset>
     </center>
   </div>
-</fieldset>
-
-<fieldset style="border:#3083b8 2px groove; box-shadow:5px 5px 20px #999; background-color:#f1f1f1; width:500px; margin-top:15px; font-size:13px; border-radius:10px; padding:10px; box-sizing:border-box;">
-  <h2 style="color:#00aee8; font:14pt arial, sans-serif; font-weight:bold; margin:4px 0 10px;">Live RX Level</h2>
-  <div id="live-meter-wrap"><div id="live-meter-bar"></div></div>
-  <div id="live-meter-label" style="font-size:12px;color:#454545;margin-top:6px;">Live meter stopped.</div>
-  <button type="button" id="live-meter-toggle" class="green" style="height:30px;width:130px;font-size:12px;margin-top:8px;">Start live meter</button>
 </fieldset>
 
 <p style="margin-top:30px;"></p>
@@ -139,95 +118,6 @@ window.addEventListener('DOMContentLoaded', function() {
         });
         myAudio.addEventListener('play', function() {
             audioCtx.resume();
-        });
-    }
-
-    var liveSocket = null;
-    var liveButton = document.getElementById('live-meter-toggle');
-    var liveBar = document.getElementById('live-meter-bar');
-    var liveLabel = document.getElementById('live-meter-label');
-
-    function setLiveLevel(percent, label) {
-        if (liveBar) {
-            liveBar.style.width = Math.max(0, Math.min(100, percent)) + '%';
-        }
-        if (liveLabel) {
-            liveLabel.textContent = label;
-        }
-    }
-
-    function levelFromPcm(arrayBuffer) {
-        var samples = new Int16Array(arrayBuffer);
-        var peak = 0;
-        for (var i = 0; i < samples.length; i++) {
-            var value = Math.abs(samples[i]);
-            if (value > peak) {
-                peak = value;
-            }
-        }
-
-        if (peak === 0) {
-            return { percent: 0, db: -Infinity };
-        }
-
-        var normalized = peak / 32768;
-        var db = 20 * Math.log10(normalized);
-        var percent = Math.max(0, Math.min(100, ((db + 60) / 60) * 100));
-        return { percent: percent, db: db };
-    }
-
-    function stopLiveMeter() {
-        if (liveSocket) {
-            liveSocket.close();
-            liveSocket = null;
-        }
-        if (liveButton) {
-            liveButton.textContent = 'Start live meter';
-            liveButton.className = 'green';
-        }
-        setLiveLevel(0, 'Live meter stopped.');
-    }
-
-    function startLiveMeter() {
-        var protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-        liveSocket = new WebSocket(protocol + window.location.hostname + ':8001');
-        liveSocket.binaryType = 'arraybuffer';
-
-        if (liveButton) {
-            liveButton.textContent = 'Stop live meter';
-            liveButton.className = 'red';
-        }
-        setLiveLevel(0, 'Connecting to live RX monitor...');
-
-        liveSocket.onopen = function() {
-            setLiveLevel(0, 'Live meter running. Transmit audio to see the level.');
-        };
-        liveSocket.onmessage = function(event) {
-            var level = levelFromPcm(event.data);
-            var label = level.db === -Infinity ? '-∞ dBFS' : level.db.toFixed(1) + ' dBFS';
-            setLiveLevel(level.percent, 'Live level: ' + label);
-        };
-        liveSocket.onerror = function() {
-            setLiveLevel(0, 'Live meter connection failed. Check svxlink-node.service.');
-        };
-        liveSocket.onclose = function() {
-            if (liveSocket) {
-                liveSocket = null;
-                if (liveButton) {
-                    liveButton.textContent = 'Start live meter';
-                    liveButton.className = 'green';
-                }
-            }
-        };
-    }
-
-    if (liveButton) {
-        liveButton.addEventListener('click', function() {
-            if (liveSocket) {
-                stopLiveMeter();
-            } else {
-                startLiveMeter();
-            }
         });
     }
 });
