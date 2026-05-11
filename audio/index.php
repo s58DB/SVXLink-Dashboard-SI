@@ -2,6 +2,30 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+$audioDir = __DIR__;
+$message = "";
+$messageClass = "";
+
+if (isset($_POST['recAudio'])) {
+    $recordScript = $audioDir . '/record.sh';
+    $output = array();
+    $returnCode = 1;
+
+    if (!is_file($recordScript)) {
+        $message = "Recording script not found: " . htmlspecialchars($recordScript, ENT_QUOTES, 'UTF-8');
+        $messageClass = "red";
+    } else {
+        exec('bash ' . escapeshellarg($recordScript) . ' 2>&1', $output, $returnCode);
+        if ($returnCode === 0) {
+            $message = "Recording completed. Play the latest audio file below.";
+            $messageClass = "green";
+        } else {
+            $message = "Recording failed: " . htmlspecialchars(implode(" | ", array_slice($output, -4)), ENT_QUOTES, 'UTF-8');
+            $messageClass = "red";
+        }
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -49,15 +73,19 @@ a { color: #607d8b; }
 
 <p style="margin-top:30px;"></p>
 <?php
-$filelist = glob('/var/www/html/audio/audio-*.wav');
+$filelist = glob($audioDir . '/audio-*.wav');
 rsort($filelist); // newest first
 
 if (!empty($filelist)) {
     $latestFile = $filelist[0];
+    $latestUrl = basename($latestFile);
     echo '<div id="player">';
+    echo '<p style="font-size:12px;color:#454545;">Latest recording: <b>' . htmlspecialchars(basename($latestFile), ENT_QUOTES, 'UTF-8') . '</b></p>';
     echo '<audio id="my-audio" preload="auto" controls style="width:100%; display:block; border-radius:8px; box-sizing:border-box;">';
-    echo '<source src="' . $latestFile . '?t=' . time() . '" type="audio/wav">';
+    echo '<source src="' . htmlspecialchars($latestUrl, ENT_QUOTES, 'UTF-8') . '?t=' . time() . '" type="audio/wav">';
     echo '</audio></div>';
+} else {
+    echo '<p style="font-size:12px;color:#8a4d00;">No audio recording found yet. Click the record button and transmit audio during the 15 second window.</p>';
 }
 ?>
 
@@ -94,10 +122,9 @@ function func() {
 </form>
 
 <?php
-if (isset($_POST['recAudio'])) {
-    // Record from rx_dup, 15 sec
-    exec('/var/www/html/audio/record.sh');
-    header("Refresh:0; url=index.php");
+if ($message !== "") {
+    $style = ($messageClass === "green") ? "color:green;" : "color:#a00000;";
+    echo '<p style="font-size:12px;font-weight:bold;' . $style . '">' . $message . '</p>';
 }
 ?>
 
