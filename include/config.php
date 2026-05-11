@@ -1,5 +1,46 @@
 <?php
 
+if (!function_exists('parse_svxlink_config_file')) {
+    function parse_svxlink_config_file($filename) {
+        $config = array();
+        $section = '';
+        $lines = @file($filename, FILE_IGNORE_NEW_LINES);
+
+        if ($lines === false) {
+            return $config;
+        }
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+
+            if ($line === '' || $line[0] === '#' || $line[0] === ';') {
+                continue;
+            }
+
+            if (preg_match('/^\[(.+)\]$/', $line, $matches)) {
+                $section = trim($matches[1]);
+                if (!isset($config[$section])) {
+                    $config[$section] = array();
+                }
+                continue;
+            }
+
+            if (strpos($line, '=') !== false) {
+                list($key, $value) = array_map('trim', explode('=', $line, 2));
+                $value = trim($value, "\"'");
+
+                if ($section !== '') {
+                    $config[$section][$key] = $value;
+                } else {
+                    $config[$key] = $value;
+                }
+            }
+        }
+
+        return $config;
+    }
+}
+
 if ( file_exists(__DIR__."/config.inc.php") ) { include_once __DIR__."/config.inc.php"; }
 else {
 // header lines for information
@@ -101,7 +142,7 @@ define("SHOWPTT","TRUE");
 //
 $svxConfigFile = '/etc/svxlink/svxlink.conf';
 if (fopen($svxConfigFile,'r'))
-   { $svxconfig = parse_ini_file($svxConfigFile,true,INI_SCANNER_RAW);
+   { $svxconfig = parse_svxlink_config_file($svxConfigFile);
      $refApi = $svxconfig['ReflectorLogic']['API'];
      $fmnetwork =$svxconfig['ReflectorLogic']['HOSTS'];
      $qth = $svxconfig['LocationInfo']['QTH'];

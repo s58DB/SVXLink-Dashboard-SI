@@ -21,7 +21,7 @@ echo "<tr><th><span style=\"font-size:12px;\">Active Logics</span></th></tr>\n";
 else {$svxConfigFile = SVXCONFPATH."/".SVXCONFIG;
   }
   if (fopen($svxConfigFile,'r')) 
-    {$svxconfig = parse_ini_file($svxConfigFile,true,INI_SCANNER_RAW); }
+    {$svxconfig = parse_svxlink_config_file($svxConfigFile); }
     $callsign = $svxconfig['ReflectorLogic']['CALLSIGN'];     
     $check_logics = explode(",",$svxconfig['GLOBAL']['LOGICS']);
     

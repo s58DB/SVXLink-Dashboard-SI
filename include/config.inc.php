@@ -246,7 +246,7 @@ define("DATABASES","/var/www/html/databases");
 //$svxConfigFile = '/etc/svxlink/svxlink.conf';
 $svxConfigFile = SVXCONFPATH . SVXCONFIG;
 if (fopen($svxConfigFile, 'r')) {
-    $svxconfig = parse_ini_file($svxConfigFile, true, INI_SCANNER_RAW);
+    $svxconfig = parse_svxlink_config_file($svxConfigFile);
     $refApi = isset($svxconfig['ReflectorLogic']['API']) ? $svxconfig['ReflectorLogic']['HOSTS'] : '';
     $fmnetwork = isset($svxconfig['ReflectorLogic']['HOSTS']) ? $svxconfig['ReflectorLogic']['HOSTS'] : '';
     $qth = isset($svxconfig['LocationInfo']['QTH']) ? $svxconfig['LocationInfo']['QTH'] : '';
