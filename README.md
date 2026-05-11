@@ -86,8 +86,16 @@ Brought up to date by Chris Jackson G4NAB with new code.</h2>
 <p>The svxlink dashboard has some ideas created by G4NAB, W6SJM, SP2ONG, SP0DZ
 and upgraded by G4NAB</p>
 <h2>Addendum</h2>
+<h3>S58DB branch additions</h3>
+<p>This branch includes a Slovenian S58DB/ZRS dashboard presentation, updated fresh-install instructions for the <b>s58db-svxlink-dashboard</b> branch, and a setup flow intended for Debian 12 with PHP 8.2.</p>
+<p>Sysop-only actions are protected by dashboard authorisation. Unauthorised users can view public dashboard information, while DTMF controls, schedule changes, log/debug views, and power or edit actions require login.</p>
+<p>The DTMF control panel includes operational button handling and a scheduled TG change feature. Scheduled TG changes can run once, daily, weekly, monthly, or yearly, and the cron helper writes the configured TG DTMF command directly to the SvxLink DTMF control file.</p>
+<p>The Talk Groups page can now edit the local TG name database. Changes are written to <b>include/tgdb.php</b> and are reused by the <b>SVXReflector Activity</b> table for the <b>TG Name</b> column.</p>
+<p>The SVXReflector Activity table handles unknown TG numbers more cleanly and includes debug views for checking reflector log parsing, latest talker events, TX timing, and pause-mode behaviour.</p>
+<p>EchoLink status is read from existing SvxLink log output instead of replacing <b>EchoLink.tcl</b>. The sidebar can show connected EchoLink nodes, active TX, last TX, and directory server or proxy information when available in the logs.</p>
+<p>The dashboard styling and navigation have been adjusted for the S58DB edition, including the Slovenian header branding, ZRS emblem, refreshed menu treatment, and more guarded access to sensitive pages.</p>
 <p>Additional Talk Groups can be added to the Svxlink Configurator.</p>
-<p>Airports can be added and removed as required in the MetarInfo Configurator.</p
+<p>Airports can be added and removed as required in the MetarInfo Configurator.</p>
 <p>The Audio test dashboard seems not to work for the moment.</p>
 <p>Module EchoLink can be added throught the dashboard, in the EchoLink configurator first of all, then add ModuleEchoLink to the MODULES= line in the [SimplexLogic] or [RepeaterLogic] section of the Svxlink Configurator.</p>
 <p>EchoLink Stations can now be identified on the sidebar, thanks to Sam W6SJM, with a small code adjustement</p>
