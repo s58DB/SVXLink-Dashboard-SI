@@ -6,6 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 $audioDir = __DIR__;
 $message = "";
 $messageClass = "";
+$recordLog = $audioDir . '/record-last.log';
 
 if (isset($_POST['recAudio'])) {
     $recordScript = $audioDir . '/record.sh';
@@ -123,6 +124,17 @@ function func() {
 if ($message !== "") {
     $style = ($messageClass === "green") ? "color:green;" : "color:#a00000;";
     echo '<p style="font-size:12px;font-weight:bold;' . $style . '">' . $message . '</p>';
+}
+
+if (is_file($recordLog)) {
+    $logLines = file($recordLog, FILE_IGNORE_NEW_LINES);
+    $logTail = implode("\n", array_slice($logLines ?: array(), -10));
+    if ($logTail !== "") {
+        echo '<details style="margin-top:12px;text-align:left;font-size:12px;max-width:500px;">';
+        echo '<summary style="cursor:pointer;font-weight:bold;color:#003366;">Last recording log</summary>';
+        echo '<pre style="white-space:pre-wrap;background:#111d33;color:#ffffff;padding:8px;border-radius:4px;">' . htmlspecialchars($logTail, ENT_QUOTES, 'UTF-8') . '</pre>';
+        echo '</details>';
+    }
 }
 ?>
 
