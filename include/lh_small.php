@@ -46,7 +46,7 @@ for ($i = 0;  ($i <= 20); $i++) { //Last 20 calls
                }
 		//echo "<td align=\"left\">&nbsp;<span style=\"color:#b5651d;font-weight:bold;\">$listElem[2]</span></td>";
 		$tgnumber = substr($listElem[2],3);
-                $name=$tgdb_array[$tgnumber];
+                $name=$tgdb_array[$tgnumber] ?? "";
 		echo "<td align=\"left\">&nbsp;<span style=\"color:#b5651d;font-weight:bold;\">$tgnumber</span></td>";
 		echo "<td><button type=submit id=jumptoM name=jmptoM class=monitor_id value=\"$listElem[2]\"><i class=\"material-icons\"style=\"font-size:15px;\">volume_up</i></button></td>";
 		//echo "<td onlick='monitorTmpTG(".$tgnumber.")'> M </a></td>";

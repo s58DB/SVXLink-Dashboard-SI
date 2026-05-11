@@ -94,7 +94,8 @@ include_once "include/buttons.php";
      }
 
     echo 'function reloadTalkGroups(){'."\n";
-    echo '  $("#TalkGroups").load("include/tg.php",function(){ setTimeout(reloadLastHeard,3000) });'."\n";
+    echo '  if ($("#TalkGroups input:focus").length) { setTimeout(reloadTalkGroups,3000); return; }'."\n";
+    echo '  $("#TalkGroups").load("include/tg.php",function(){ setTimeout(reloadTalkGroups,3000) });'."\n";
     echo '}'."\n";
     echo 'setTimeout(reloadTalkGroups,3000);'."\n";
 
