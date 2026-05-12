@@ -38,6 +38,37 @@ record_audio() {
     arecord -D "$device" -V mono -r 48000 -f S16_LE -c1 -d 15 "$target"
 }
 
+audio_has_signal() {
+    local target="$1"
+    local peak
+
+    if ! command -v od >/dev/null 2>&1; then
+        echo "od command not found, skipping silence check"
+        return 0
+    fi
+
+    peak="$(od -An -j 44 -t d2 -v "$target" 2>/dev/null | awk '
+        {
+            for (i = 1; i <= NF; i++) {
+                sample = $i < 0 ? -$i : $i
+                if (sample > max) {
+                    max = sample
+                }
+            }
+        }
+        END { print max + 0 }
+    ')"
+
+    echo "Recorded peak sample: $peak"
+
+    if [ "$peak" -lt 64 ]; then
+        echo "Recording is silent or almost silent on this device" >&2
+        return 1
+    fi
+
+    return 0
+}
+
 try_recording() {
     local target="$1"
     shift
@@ -52,7 +83,9 @@ try_recording() {
         tried="$tried $device"
 
         if record_audio "$target" "$device"; then
-            return 0
+            if audio_has_signal "$target"; then
+                return 0
+            fi
         fi
 
         rm -f "$target"
@@ -67,7 +100,7 @@ try_recording() {
 timestamp="$(date +%Y-%m-%d-%H-%M-%S)"
 tmpfile="$SCRIPT_DIR/.audio-$timestamp.tmp.wav"
 file="$SCRIPT_DIR/audio-$timestamp.wav"
-if ! try_recording "$tmpfile" "$DEFAULT_AUDIO_DEVICE" "plughw:Loop,1,0" "plughw:Loopback,1,0" "plughw:1,1" "plughw:1,0" "rx_monitor" "default"; then
+if ! try_recording "$tmpfile" "$DEFAULT_AUDIO_DEVICE" "plughw:Loop,1,0" "plughw:Loopback,1,0" "plughw:Loopback,1,1" "plughw:1,1" "plughw:1,0" "rx_monitor" "default"; then
     exit 1
 fi
 
