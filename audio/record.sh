@@ -2,7 +2,7 @@
 set -u
 
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
-DEFAULT_AUDIO_DEVICE="${AUDIO_TEST_DEVICE:-plughw:Loopback,1,0}"
+DEFAULT_AUDIO_DEVICE="${AUDIO_TEST_DEVICE:-${SVX_AUDIO_DEVICE:-plughw:1,1}}"
 LOG_FILE="$SCRIPT_DIR/record-last.log"
 
 if [ ! -w "$SCRIPT_DIR" ]; then
@@ -100,9 +100,9 @@ try_recording() {
 timestamp="$(date +%Y-%m-%d-%H-%M-%S)"
 tmpfile="$SCRIPT_DIR/.audio-$timestamp.tmp.wav"
 file="$SCRIPT_DIR/audio-$timestamp.wav"
-if ! try_recording "$tmpfile" "$DEFAULT_AUDIO_DEVICE" "hw:Loopback,1,0" "plughw:Loopback,1,0" "plughw:Loopback,1,1" "hw:Loopback,1,1" "plughw:1,1" "plughw:1,0" "rx_monitor"; then
+if ! try_recording "$tmpfile" "$DEFAULT_AUDIO_DEVICE" "plughw:1,1" "plughw:Loop,1,0" "plughw:Loopback,1,0" "plughw:1,0"; then
     echo "No usable audio was captured." >&2
-    echo "Check that SvxLink has a TxStream transmitter that plays to alsa:plughw:Loopback,0,0 and that MultiTx includes TxStream." >&2
+    echo "The audio test uses the same capture device order as the RX Monitor. Check that audio is active during the 15 second recording window." >&2
     exit 1
 fi
 
