@@ -168,7 +168,7 @@ if ($message !== "") {
 $visibleLog = is_file($recordLog) ? $recordLog : (is_file($fallbackRecordLog) ? $fallbackRecordLog : "");
 if ($visibleLog !== "") {
     $logLines = file($visibleLog, FILE_IGNORE_NEW_LINES);
-    $logTail = implode("\n", array_slice($logLines ?: array(), -10));
+    $logTail = implode("\n", array_slice($logLines ?: array(), -40));
     if ($logTail !== "") {
         echo '<details style="margin-top:12px;text-align:left;font-size:12px;max-width:500px;">';
         echo '<summary style="cursor:pointer;font-weight:bold;color:#003366;">Last recording log</summary>';
