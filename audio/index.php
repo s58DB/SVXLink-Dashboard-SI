@@ -7,6 +7,11 @@ $audioDir = __DIR__;
 $message = "";
 $messageClass = "";
 $recordLog = $audioDir . '/record-last.log';
+$fallbackRecordLog = '/tmp/svxlink-audio-record-last.log';
+
+function h($value) {
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+}
 
 if (isset($_POST['recAudio'])) {
     $recordScript = $audioDir . '/record.sh';
@@ -14,7 +19,7 @@ if (isset($_POST['recAudio'])) {
     $returnCode = 1;
 
     if (!is_file($recordScript)) {
-        $message = "Recording script not found: " . htmlspecialchars($recordScript, ENT_QUOTES, 'UTF-8');
+        $message = "Recording script not found: " . h($recordScript);
         $messageClass = "red";
     } else {
         exec('bash ' . escapeshellarg($recordScript) . ' 2>&1', $output, $returnCode);
@@ -22,7 +27,7 @@ if (isset($_POST['recAudio'])) {
             $message = "Recording completed. Play the latest audio file below.";
             $messageClass = "green";
         } else {
-            $message = "Recording failed: " . htmlspecialchars(implode(" | ", array_slice($output, -4)), ENT_QUOTES, 'UTF-8');
+            $message = "Recording failed: " . h(implode(" | ", array_slice($output, -4)));
             $messageClass = "red";
         }
     }
@@ -75,15 +80,17 @@ a { color: #607d8b; }
 <p style="margin-top:30px;"></p>
 <?php
 $filelist = glob($audioDir . '/audio-*.wav');
-rsort($filelist); // newest first
+usort($filelist, function($a, $b) {
+    return filemtime($b) <=> filemtime($a);
+});
 
 if (!empty($filelist)) {
     $latestFile = $filelist[0];
     $latestUrl = basename($latestFile);
     echo '<div id="player">';
-    echo '<p style="font-size:12px;color:#454545;">Latest recording: <b>' . htmlspecialchars(basename($latestFile), ENT_QUOTES, 'UTF-8') . '</b></p>';
+    echo '<p style="font-size:12px;color:#454545;">Latest recording: <b>' . h(basename($latestFile)) . '</b> (' . h(filesize($latestFile)) . ' bytes)</p>';
     echo '<audio id="my-audio" preload="auto" controls style="width:100%; display:block; border-radius:8px; box-sizing:border-box;">';
-    echo '<source src="' . htmlspecialchars($latestUrl, ENT_QUOTES, 'UTF-8') . '?t=' . time() . '" type="audio/wav">';
+    echo '<source src="' . h($latestUrl) . '?t=' . time() . '" type="audio/wav">';
     echo '</audio></div>';
     echo '<div id="audio-status" style="font-size:12px;color:#454545;margin-top:6px;"></div>';
 } else {
@@ -97,27 +104,45 @@ if (!empty($filelist)) {
 window.addEventListener('DOMContentLoaded', function() {
     var myAudio = document.getElementById('my-audio');
     var meterElement = document.getElementById('my-peak-meter');
+    var statusElement = document.getElementById('audio-status');
+    var audioCtx = null;
+    var meterReady = false;
+
+    function setStatus(text, color) {
+        if (statusElement) {
+            statusElement.textContent = text;
+            statusElement.style.color = color || '#454545';
+        }
+    }
+
+    function initMeter() {
+        if (!myAudio || !meterElement || meterReady) {
+            return;
+        }
+
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            var sourceNode = audioCtx.createMediaElementSource(myAudio);
+            var meterNode = webAudioPeakMeter.createMeterNode(sourceNode, audioCtx);
+            webAudioPeakMeter.createMeter(meterElement, meterNode, {});
+            meterReady = true;
+        } catch (err) {
+            setStatus('Peak meter could not start: ' + err.message, '#a00000');
+        }
+    }
 
     if (myAudio && meterElement) {
-        var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        var sourceNode = audioCtx.createMediaElementSource(myAudio);
-        var meterNode = webAudioPeakMeter.createMeterNode(sourceNode, audioCtx);
-        webAudioPeakMeter.createMeter(meterElement, meterNode, {});
-
-        var statusElement = document.getElementById('audio-status');
         myAudio.addEventListener('canplay', function() {
-            if (statusElement) {
-                statusElement.textContent = 'Recording loaded. Press play to view the peak meter.';
-            }
+            setStatus('Recording loaded. Press play to view the peak meter.');
         });
         myAudio.addEventListener('error', function() {
-            if (statusElement) {
-                statusElement.textContent = 'Browser could not load the WAV recording.';
-                statusElement.style.color = '#a00000';
-            }
+            setStatus('Browser could not load the WAV recording.', '#a00000');
         });
         myAudio.addEventListener('play', function() {
-            audioCtx.resume();
+            initMeter();
+            if (audioCtx) {
+                audioCtx.resume();
+            }
         });
     }
 });
@@ -140,13 +165,14 @@ if ($message !== "") {
     echo '<p style="font-size:12px;font-weight:bold;' . $style . '">' . $message . '</p>';
 }
 
-if (is_file($recordLog)) {
-    $logLines = file($recordLog, FILE_IGNORE_NEW_LINES);
+$visibleLog = is_file($recordLog) ? $recordLog : (is_file($fallbackRecordLog) ? $fallbackRecordLog : "");
+if ($visibleLog !== "") {
+    $logLines = file($visibleLog, FILE_IGNORE_NEW_LINES);
     $logTail = implode("\n", array_slice($logLines ?: array(), -10));
     if ($logTail !== "") {
         echo '<details style="margin-top:12px;text-align:left;font-size:12px;max-width:500px;">';
         echo '<summary style="cursor:pointer;font-weight:bold;color:#003366;">Last recording log</summary>';
-        echo '<pre style="white-space:pre-wrap;background:#111d33;color:#ffffff;padding:8px;border-radius:4px;">' . htmlspecialchars($logTail, ENT_QUOTES, 'UTF-8') . '</pre>';
+        echo '<pre style="white-space:pre-wrap;background:#111d33;color:#ffffff;padding:8px;border-radius:4px;">' . h($logTail) . '</pre>';
         echo '</details>';
     }
 }
